@@ -21,26 +21,11 @@ static int bcdtobin(int val) {
     return (val & 0xF) + (val >> 4) * 10;
 }
 
-int rtc_get_seconds() {
-    int second = read(0);
-    return second;
-}
-
-int rtc_get_minutes() {
-    int minute = read(0x2);
-    return minute;
-}
-
-int rtc_get_hours() {
-    int hour = read(0x4);
-    return hour;
-}
-
 time rtc_get_time() {
     time ret_time;
-    ret_time.hour = rtc_get_hours();
-    ret_time.minute = rtc_get_minutes();
-    ret_time.second = rtc_get_seconds();
+    ret_time.hour = read(0x4);
+    ret_time.minute = read(0x2);
+    ret_time.second = read(0);
 
     return ret_time;
 }
@@ -62,7 +47,7 @@ datetime_t rtc_get_date_time() {
 
     // BCD conversion
 
-    if (~registerB & REGB_DM) {
+    if (~registerB & registerB_DataMode) {
         date_time.time.second = bcdtobin(date_time.time.second);
         date_time.time.minute = bcdtobin(date_time.time.minute);
         date_time.time.hour = bcdtobin(date_time.time.hour);
@@ -79,12 +64,7 @@ datetime_t rtc_get_date_time() {
 
     // Calculate the full (4-digit) year
 
-    if (century_register != 0) {
-        date_time.year += date_time.century * 100;
-    } else {
-        date_time.year += (CURRENT_YEAR / 100) * 100;
-        if (date_time.year < CURRENT_YEAR) date_time.year += 100;
-    }
+    date_time.year += 2000;
 
     return date_time;
 }
