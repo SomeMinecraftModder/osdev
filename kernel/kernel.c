@@ -10,6 +10,7 @@
 #include "../drivers/reboot.h"
 #include "../libc/string.h"
 #include "../cpu/detect.h"
+#include "../cpu/timer.h"
 #include "../libc/mem.h"
 #include "../cpu/isr.h"
 #include "kernel.h"
@@ -21,13 +22,15 @@ void kernel_main() {
     isr_install();
     irq_install();
     serial_install(); // COM1
-    write_serial("Hello world.");
-
-    kprint("Boot Successful.\n"
-        "\n");
+    write_serial("\nCOM1 successfully initialized.\n\n");
     
+    kprint("Boot success.\n"
+        "\n");
+
     kprint("Type something, it will go through the kernel\n"
-        "Type \"end\" to halt the CPU or \"page\" to request a kmalloc()\n> ");
+        "Type \"end\" to halt the CPU, \"page\" to request a kmalloc()\n"
+        "\"clear\" to clear the screen, \"cpuinfo\" to get information about your CPU or\n"
+        "\"reboot\" to reboot your computer (There is no shutdown yet). \n> ");
 }
 
 void user_input(char *input) {
@@ -62,6 +65,6 @@ void user_input(char *input) {
     } else if (dis_print == 1) {
         kprint("> ");
     } else {
-        PANIC("No valid value on dis_print variable.", "kernel.c", 34);
+        PANIC("No valid value on dis_print variable.", "kernel.c", 37);
     }
 }

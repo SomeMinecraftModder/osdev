@@ -113,6 +113,53 @@ int strcmp(char s1[], char s2[]) {
 // K&R
 int strlen(char s[]) {
     int i = 0;
-    while (s[i] != '\0') ++i;
+    while (s[i] != '\0') {
+        ++i;
+    }
     return i;
+}
+
+char *strcpy(char *src, char *dst) {
+    char *ptr = dst;
+    while (*src != '\0') {
+        *ptr++ = *src++;
+    }
+    *ptr = '\0';
+    return dst;
+}
+
+char *strncpy(char *src, char *dst, int n) {
+    char *ptr = dst;
+    while (*src != '\0' && n--) {
+        *ptr++ = *src++;
+    }
+    *ptr = '\0';
+    return dst;
+}
+
+char *strcat(char *dst, char *src) {
+    char *ptr = dst + strlen(dst);
+    while (*src != '\0') {
+        *ptr++ = *src++;
+    }
+    *ptr = '\0';
+    return dst;
+}
+
+char *strncat(char *dst, char *src, int n) {
+    char *ptr = dst + strlen(dst);
+    while (*src != '\0' && n--) {
+        *ptr++ = *src++;
+    }
+    *ptr = '\0';
+    return dst;
+}
+
+char *str_truncate(char *str, int n) {
+    if (n <= 0) return str;
+    int l = n;
+    int len = strlen(str);
+    if (n > len) l = len;
+    str[len-l] = '\0';
+    return str;
 }

@@ -1,9 +1,14 @@
 #ifndef STRINGS_H
 #define STRINGS_H
 
+char *strncpy(char *src, char *dst, int n);
+char *strncat(char *dst, char *src, int n);
 int startswith(char *str, char *accept);
 void int_to_ascii(int n, char str[]);
 void hex_to_ascii(int n, char str[]);
+char *str_truncate(char *str, int n);
+char *strcpy(char *src, char *dst);
+char *strcat(char *dst, char *src);
 int strcmp(char s1[], char s2[]);
 void append(char s[], char n);
 int ascii_to_int(char *str);
