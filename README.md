@@ -1,5 +1,5 @@
 # PawsOS
-A simple OS which supports various features:
+A simple OS which have various features:
 - IRQs
 - ISR
 - GDT
@@ -9,7 +9,7 @@ A simple OS which supports various features:
 - Multiboot (Can be booted by GNU Grub)
 - Small memory manager (unfinished)
 - RTC (Real Time Clock)
-- And more features.
+- And more.
 
 This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tutorial) and some other OSes with GPL compatible license.
 
@@ -23,5 +23,5 @@ This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tu
 │       └───grub
 ├───kernel # Files directly related to the OS/kernel, like the kernel panic or the kernel itself.
 ├───libc # A small LibC used by various components on the OS.
-└───os-image.iso # Bootable file created after successful build. which includes the OS and the Grub bootloader.
+└───os-image.iso # Bootable file created after successful build. Includes the OS and the bootloader (Grub).
 ```
