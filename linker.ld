@@ -7,7 +7,7 @@ SECTIONS
 	/* we need 1MB of space atleast */
 	. = 1M;
 
-  /* text section */
+	/* text section */
 	.text BLOCK(4K) : ALIGN(4K)
 	{
 		*(.multiboot)
@@ -36,11 +36,11 @@ SECTIONS
 	}
 
 	/* The compiler may produce other sections, by default it will put them in
-     a segment with the same name. Simply add stuff here as needed. */
-  .kend BLOCK(4K) : ALIGN(4K)
-  {
-      *(.kend)
-  }
+	a segment with the same name. Simply add stuff here as needed. */
+	.kend BLOCK(4K) : ALIGN(4K)
+	{
+		*(.kend)
+	}
 
 	/*
 	 * Get rid of unnecessary GCC bits.
