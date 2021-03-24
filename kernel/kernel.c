@@ -66,6 +66,6 @@ void user_input(char *input) {
     } else if (dis_print == 1) {
         kprint("> ");
     } else {
-        PANIC("No valid value on dis_print variable.", "kernel.c", 37);
+        PANIC("No valid value on dis_print variable.", "kernel.c", 36);
     }
 }

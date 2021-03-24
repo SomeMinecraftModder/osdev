@@ -1,5 +1,4 @@
 #include "../drivers/screen.h"
-#include "../cpu/isr.h"
 #include "panic.h"
 
 void PANIC(char *PANIC_MSG, char *file, uint32_t line) {
