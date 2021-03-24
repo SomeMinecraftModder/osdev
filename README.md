@@ -22,6 +22,6 @@ This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tu
 │   └───boot
 │       └───grub
 ├───kernel # Files directly related to the OS/kernel, like the kernel panic or the kernel itself.
-├───libc # A small LibC used by various Kernel components.
-└───os-image.iso # Bootable file which includes the OS and Grub bootloader.
+├───libc # A small LibC used by various components on the OS.
+└───os-image.iso # Bootable file which includes the OS and the Grub bootloader.
 ```
