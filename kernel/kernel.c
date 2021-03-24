@@ -4,18 +4,15 @@
   #error "This code must be compiled with an x86-elf compiler"
 #endif
 
-#include "../drivers/keyboard.h"
 #include "../drivers/screen.h"
 #include "../drivers/serial.h"
 #include "../drivers/reboot.h"
 #include "../libc/string.h"
 #include "../cpu/detect.h"
-#include "../cpu/timer.h"
 #include "../libc/mem.h"
 #include "../cpu/isr.h"
 #include "kernel.h"
 #include "panic.h"
-#include <stdint.h>
 
 void kernel_main() {
     clear_screen();
