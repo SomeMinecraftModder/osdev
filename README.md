@@ -15,7 +15,7 @@ This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tu
 
 ### Directory structure:
 ```
-├───boot # Boot files, includes GDT, Multiboot headers and Boot file.
+┌───boot # Boot files, includes GDT, Multiboot headers and Boot file.
 ├───cpu # Files related to the CPU, like ports or interrupts.
 ├───drivers # As the name states, are drivers like the keyboard or screen driver.
 ├───iso # Folder created after successful build. Includes bin file (The OS) and grub.cfg (Grub configuration file).
@@ -23,5 +23,5 @@ This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tu
 │       └───grub
 ├───kernel # Files directly related to the OS/kernel, like the kernel panic or the kernel itself.
 ├───libc # A small LibC used by various components on the OS.
-└───os-image.iso # Bootable file which includes the OS and the Grub bootloader.
+└───os-image.iso # Bootable file created after successful build. which includes the OS and the Grub bootloader.
 ```
