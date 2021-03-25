@@ -65,6 +65,6 @@ void shell(char *input) {
     } else if (dis_print == 1) {
         kprint("> ");
     } else {
-        PANIC("No valid value on dis_print variable.", "shell.c", 12);
+        PANIC("No valid value on dis_print variable.", "shell.c", 11);
     }
 }
