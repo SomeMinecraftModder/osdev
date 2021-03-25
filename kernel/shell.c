@@ -4,12 +4,12 @@
 #include "../drivers/rtc.h"
 #include "../cpu/detect.h"
 #include "../libc/mem.h"
-#include <stdint.h>
 #include "panic.h"
 #include "shell.h"
 
 void shell(char *input) {
     int dis_print = 0;
+
     if (strcmp(input, "end") == 0) {
         kprint("Stopping the CPU. Bye!\n");
         halt();
@@ -46,7 +46,7 @@ void shell(char *input) {
         }
         kprint("\n");
     } else if (strcmp(input, "help") == 0) {
-        kprint("Welcome to PawsOS, here are all the commands:\n"
+        kprint("Welcome to PawsOS, these are all the commands:\n"
             "\"end\": to halt the CPU.\n"
             "\"page\": to request a kmalloc().\n"
             "\"clear\": to clear the screen.\n"
