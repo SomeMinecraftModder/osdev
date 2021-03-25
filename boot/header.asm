@@ -1,11 +1,12 @@
-MALIGN   equ 1<<0
-MEMINFO  equ 1<<1
-FLAGS    equ MALIGN | MEMINFO
-MAGIC    equ 0x1BADB002
-CHECKSUM equ -(MAGIC + FLAGS)
-
 section .multiboot
-align 4
-dd MAGIC
-dd FLAGS
-dd CHECKSUM
+header_start:
+    dd 0xE85250D6
+    dd 0x0
+    dd header_end - header_start
+    dd 0x100000000 - (0xE85250D6 + 0x0 + (header_end - header_start))
+
+    dw 0
+    dw 0
+    dd 8
+
+header_end:

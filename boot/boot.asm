@@ -49,7 +49,7 @@ _start:
 .end:
 
 test_multiboot:
-    cmp eax, 0x2BADB002
+    cmp eax, 0x36D76289
     jne .no_multiboot
     ret
 
