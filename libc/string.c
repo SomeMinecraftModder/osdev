@@ -110,6 +110,14 @@ int strcmp(char s1[], char s2[]) {
     return s1[i] - s2[i];
 }
 
+int strncmp(char s1[], char s2[], int n) {
+    int i;
+    for (i = 0; n && s1[i] == s2[i]; ++i, --n) {
+        if (s1[i] == '\0') return 0;
+    }
+    return (s1[i] - s2[i]);
+}
+
 // K&R
 int strlen(char s[]) {
     int i = 0;

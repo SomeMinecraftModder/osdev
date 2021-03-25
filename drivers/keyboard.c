@@ -58,16 +58,17 @@ static void keyboard_callback(registers_t *regs) {
         user_input(key_buffer); // kernel-controlled function
         key_buffer[0] = '\0';
     } else if (scancode == CAPSLOCK) {
-        // Toggle caps lock
-        if (CapsLockStatus)
+        // Toggle caps lock current status
+        if (CapsLockStatus) {
             CapsLockStatus = 0;
-        else {
+        } else {
             CapsLockStatus = 1;
         }
     } else {
         char letter = sc_ascii[(int)scancode];
-        if (CapsLockStatus == 0)
+        if (CapsLockStatus == 0) {
             letter = Lsc_ascii[(int)scancode];
+        }
         // Remember that kprint only accepts char[]
         char str[2] = {letter, '\0'};
         append(key_buffer, letter);
