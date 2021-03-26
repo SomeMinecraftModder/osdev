@@ -35,9 +35,9 @@ void clear_screen() {
 void kprint_at(char *message, int col, int row, int color) {
     // Set cursor if col/row are negative
     int offset;
-    if (col >= 0 && row >= 0)
+    if (col >= 0 && row >= 0) {
         offset = get_offset(col, row);
-    else {
+    } else {
         offset = get_cursor_offset();
         row = get_offset_row(offset);
         col = get_offset_col(offset);
@@ -58,7 +58,7 @@ void kprint(char *message) {
 }
 
 void kprint_dec(int message) {
-    char *nstr = "";
+    static char *nstr;
     int_to_ascii(message, nstr);
     kprint_at(nstr, -1, -1, WHITE_ON_BLACK);
 }
