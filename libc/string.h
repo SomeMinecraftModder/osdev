@@ -3,11 +3,12 @@
 
 char *strncpy(char *src, char *dst, int n);
 char *strncat(char *dst, char *src, int n);
+void hex_to_ascii_upper(int n, char str[]);
 int strncmp(char s1[], char s2[], int n);
 int startswith(char *str, char *accept);
 void int_to_ascii(int n, char str[]);
 void hex_to_ascii(int n, char str[]);
-char *str_truncate(char *str, int n);
+char *strtruncate(char *str, int n);
 char *strcpy(char *src, char *dst);
 char *strcat(char *dst, char *src);
 int strcmp(char s1[], char s2[]);

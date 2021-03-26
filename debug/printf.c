@@ -35,6 +35,39 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                 case 'd':
                 case 'u':
                 case 'x':
+                    if (str) {
+                        char t[16] = "";
+                        uint32_t number = (uint32_t) va_arg(arg, uint32_t);
+                        hex_to_ascii(number, t);
+                        strcpy(str + (*pos), t);
+                        *pos = *pos + strlen(t);
+                    } else {
+                        char t[16] = "";
+                        uint32_t number = (uint32_t) va_arg(arg, uint32_t);
+                        hex_to_ascii(number, t);
+                        int i = 0;
+                        while (t[i] != 0) {
+                            putchar(t[i++]);
+                        }
+                    }
+                    break;
+                case 'X':
+                    if (str) {
+                        char t[16] = "";
+                        uint32_t number = (uint32_t) va_arg(arg, uint32_t);
+                        hex_to_ascii_upper(number, t);
+                        strcpy(str + (*pos), t);
+                        *pos = *pos + strlen(t);
+                    } else {
+                        char t[16] = "";
+                        uint32_t number = (uint32_t) va_arg(arg, uint32_t);
+                        hex_to_ascii_upper(number, t);
+                        int i = 0;
+                        while (t[i] != 0) {
+                            putchar(t[i++]);
+                        }
+                    }
+                    break;
                 case 'c':
                     if (str) {
                         *(str + *pos) = (char)va_arg(arg, int);
@@ -72,6 +105,7 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                             t++;
                         }
                     }
+                    break;
                 default:
                     break;
             }

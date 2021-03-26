@@ -39,10 +39,22 @@ void hex_to_ascii(int n, char str[]) {
         if (tmp >= 0xA) append(str, tmp - 0xA + 'a');
         else append(str, tmp + '0');
     }
+}
 
-    tmp = n & 0xF;
-    if (tmp >= 0xA) append(str, tmp - 0xA + 'a');
-    else append(str, tmp + '0');
+void hex_to_ascii_upper(int n, char str[]) {
+    append(str, '0');
+    append(str, 'x');
+    char zeros = 0;
+
+    int32_t tmp;
+    int i;
+    for (i = 28; i >= 0; i -= 4) {
+        tmp = (n >> i) & 0xF;
+        if (tmp == 0 && zeros == 0) continue;
+        zeros = 1;
+        if (tmp >= 0xA) append(str, tmp - 0xA + 'A');
+        else append(str, tmp + '0');
+    }
 }
 
 int ascii_to_int(char *str) {
@@ -163,7 +175,7 @@ char *strncat(char *dst, char *src, int n) {
     return dst;
 }
 
-char *str_truncate(char *str, int n) {
+char *strtruncate(char *str, int n) {
     if (n <= 0) return str;
     int l = n;
     int len = strlen(str);
