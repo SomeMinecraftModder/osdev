@@ -1,5 +1,6 @@
 #include "../drivers/screen.h"
 #include "../drivers/reboot.h"
+#include "../debug/printf.h"
 #include "../libc/string.h"
 #include "../drivers/rtc.h"
 #include "../cpu/detect.h"
@@ -20,11 +21,7 @@ void shell(char *input) {
         hex_to_ascii(page, page_str);
         char phys_str[16] = "";
         hex_to_ascii(phys_addr, phys_str);
-        kprint("Page: ");
-        kprint(page_str);
-        kprint(", physical address: ");
-        kprint(phys_str);
-        kprint("\n");
+        kprintf("Page: %s, physical address: %s\n", page_str, phys_str);
     } else if (strcmp(input, "clear") == 0) {
         clear_screen();
         dis_print = 1;
@@ -59,9 +56,7 @@ void shell(char *input) {
     }
 
     if (dis_print == 0) {
-        kprint("You said: ");
-        kprint(input);
-        kprint("\n> ");
+        kprintf("You said: %s\n> ", input);
     } else if (dis_print == 1) {
         kprint("> ");
     } else {

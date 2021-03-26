@@ -53,6 +53,13 @@ void kprint_at(char *message, int col, int row, int color) {
     }
 }
 
+void putchar(char c) {
+    int offset = get_cursor_offset();
+    int row = get_offset_row(offset);
+    int col = get_offset_col(offset);
+    print_char(c, col, row, WHITE_ON_BLACK);
+}
+
 void kprint(char *message) {
     kprint_at(message, -1, -1, WHITE_ON_BLACK);
 }
