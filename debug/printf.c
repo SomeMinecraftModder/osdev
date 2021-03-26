@@ -59,14 +59,14 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                 case 'i':
                     if (str) {
                         static char *t;
-                        int nu = (int) va_arg(arg, int);
-                        int_to_ascii(nu, t);
+                        int number = (int) va_arg(arg, int);
+                        int_to_ascii(number, t);
                         strcpy(str + (*pos), t);
                         *pos = *pos + strlen(t);
                     } else {
                         static char *t;
-                        int nu = (int) va_arg(arg, int);
-                        int_to_ascii(nu, t);
+                        int number = (int) va_arg(arg, int);
+                        int_to_ascii(number, t);
                         while (*t) {
                             putchar(*t);
                             t++;
