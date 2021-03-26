@@ -1,4 +1,5 @@
 #include "../drivers/screen.h"
+#include "../debug/printf.h"
 #include "detect.h"
 #include <stdint.h>
 
@@ -82,9 +83,7 @@ void cpudetect() {
     cpuid(0, &largestStandardFunc, (uint32_t *)(vendor + 0), (uint32_t *)(vendor + 8), (uint32_t *)(vendor + 4));
     vendor[12] = '\0';
 
-    kprint("CPU Vendor: ");
-    kprint(vendor);
-    kprint("\n");
+    kprintf("CPU Vendor: %s\n", vendor);
 
     if (largestStandardFunc >= 0x01) {
         cpuid(0x01, &eax, &ebx, &ecx, &edx);
@@ -138,8 +137,6 @@ void cpudetect() {
             ++p;
         }
 
-        kprint("CPU Name: ");
-        kprint(p);
-        kprint("\n");
+        kprintf("CPU Name: %s\n", p);
     }
 }

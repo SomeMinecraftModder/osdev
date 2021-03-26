@@ -14,13 +14,14 @@
 #define REG_SCREEN_DATA 0x3D5
 
 // Public kernel API
-void enable_cursor(int cursor_start, int cursor_end);
 void kprint_at(char *message, int col, int row, int color);
+void enable_cursor(int cursor_start, int cursor_end);
 void move_cursor(int col, int row);
 void kprint_dec(int message);
 void kprint(char *message);
 void kprint_backspace();
 void disable_cursor();
+void putchar(char c);
 void clear_screen();
 void kprint_rfail();
 void kprint_gok();

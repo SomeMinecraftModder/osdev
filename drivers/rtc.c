@@ -1,4 +1,5 @@
 #include "../drivers/screen.h"
+#include "../debug/printf.h"
 #include "../libc/string.h"
 #include "../cpu/ports.h"
 #include "rtc.h"
@@ -75,9 +76,7 @@ void rtctime() {
     datetime_t rtc_time = rtc_get_date_time();
 
     int_to_ascii(rtc_time.year, year);
-    kprint("Year: ");
-    kprint(year);
-    kprint("\n");
+    kprintf("Year: %s\n", year);
 
     int_to_ascii(rtc_time.month, month);
     kprint("Month: ");
@@ -86,19 +85,13 @@ void rtctime() {
         kprint("0");
     }
 
-    kprint(month);
-    kprint("\n");
+    kprintf("%s\n", month);
 
     int_to_ascii(rtc_time.day, day);
-    kprint("Day: ");
-    kprint(day);
-    kprint("\n");
+    kprintf("Day: %s\n", day);
 
     int_to_ascii(rtc_time.time.hour, hour);
-    kprint("Hour: ");
-
-    kprint(hour);
-    kprint("\n");
+    kprintf("Hour: %s\n", hour);
 
     int_to_ascii(rtc_time.time.minute, minutes);
     kprint("Minute: ");
@@ -107,8 +100,7 @@ void rtctime() {
         kprint("0");
     }
 
-    kprint(minutes);
-    kprint("\n");
+    kprintf("%s\n", minutes);
 
     int_to_ascii(rtc_time.time.second, seconds);
     kprint("Second: ");
@@ -117,6 +109,5 @@ void rtctime() {
         kprint("0");
     }
 
-    kprint(seconds);
-    kprint("\n");
+    kprintf("%s\n", seconds);
 }

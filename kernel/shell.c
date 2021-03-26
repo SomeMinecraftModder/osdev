@@ -1,5 +1,6 @@
 #include "../drivers/screen.h"
 #include "../drivers/reboot.h"
+#include "../debug/printf.h"
 #include "../libc/string.h"
 #include "../drivers/rtc.h"
 #include "../cpu/detect.h"
@@ -16,15 +17,7 @@ void shell(char *input) {
     } else if (strcmp(input, "page") == 0) {
         uint32_t phys_addr;
         uint32_t page = kmalloc(1000, 1, &phys_addr);
-        char page_str[16] = "";
-        hex_to_ascii(page, page_str);
-        char phys_str[16] = "";
-        hex_to_ascii(phys_addr, phys_str);
-        kprint("Page: ");
-        kprint(page_str);
-        kprint(", physical address: ");
-        kprint(phys_str);
-        kprint("\n");
+        kprintf("Page: %X, physical address: %X\n", page, phys_addr);
     } else if (strcmp(input, "clear") == 0) {
         clear_screen();
         dis_print = 1;
@@ -59,12 +52,10 @@ void shell(char *input) {
     }
 
     if (dis_print == 0) {
-        kprint("You said: ");
-        kprint(input);
-        kprint("\n> ");
+        kprintf("You said: %s\n> ", input);
     } else if (dis_print == 1) {
         kprint("> ");
     } else {
-        PANIC("No valid value on dis_print variable.", "shell.c", 11);
+        PANIC("No valid value on dis_print variable.", "shell.c", 12);
     }
 }
