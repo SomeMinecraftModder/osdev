@@ -17,11 +17,7 @@ void shell(char *input) {
     } else if (strcmp(input, "page") == 0) {
         uint32_t phys_addr;
         uint32_t page = kmalloc(1000, 1, &phys_addr);
-        char page_str[16] = "";
-        hex_to_ascii(page, page_str);
-        char phys_str[16] = "";
-        hex_to_ascii(phys_addr, phys_str);
-        kprintf("Page: %s, physical address: %s\n", page_str, phys_str);
+        kprintf("Page: %X, physical address: %X\n", page, phys_addr);
     } else if (strcmp(input, "clear") == 0) {
         clear_screen();
         dis_print = 1;
@@ -60,6 +56,6 @@ void shell(char *input) {
     } else if (dis_print == 1) {
         kprint("> ");
     } else {
-        PANIC("No valid value on dis_print variable.", "shell.c", 11);
+        PANIC("No valid value on dis_print variable.", "shell.c", 12);
     }
 }
