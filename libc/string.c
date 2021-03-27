@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include "../cpu/type.h"
 #include "string.h"
 #include <stdint.h>
 #include <stddef.h>
