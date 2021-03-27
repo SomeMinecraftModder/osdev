@@ -1,6 +1,9 @@
 #include "../drivers/screen.h"
+#include "../debug/printf.h"
 #include "../cpu/ports.h"
 #include "serial.h"
+#include <stdarg.h>
+#include <stddef.h>
 
 int serial_install_port(uint16_t PORT) {
     kprint_gok();
@@ -33,7 +36,7 @@ void serial_install() {
 }
 
 int is_transmit_empty(uint16_t PORT) {
-   return port_byte_in(PORT + 5) & 0x20;
+    return port_byte_in(PORT + 5) & 0x20;
 }
 
 void write_serial(char *word) {
@@ -41,23 +44,43 @@ void write_serial(char *word) {
 }
 
 void write_serial_port(uint16_t PORT, char *word) {
-   while (is_transmit_empty(PORT) == 0);
+    while (is_transmit_empty(PORT) == 0);
 
-   while (*word != '\0') {
-       if ((uint8_t) *word == 0xFF) {
-           write_serial(" [Error in string.]\n ");
-       }
-       port_byte_out(PORT, *word);
-       word++;
-   }
+    while (*word != '\0') {
+        if ((uint8_t) *word == 0xFF) {
+            write_serial(" [Error in string.]\n ");
+        }
+        port_byte_out(PORT, *word);
+        word++;
+    }
+}
+
+void write_serial_port_char(uint16_t PORT, char word) {
+    while (is_transmit_empty(PORT) == 0);
+
+    if ((uint8_t) word == 0xFF) {
+        write_serial(" [Error in string.]\n ");
+    }
+    port_byte_out(PORT, word);
+}
+
+void write_serial_char(char word) {
+    write_serial_port_char(COM1, word);
+}
+
+void printf_serial(char *s, ...) {
+    va_list ap;
+    va_start(ap, s);
+    vsprintf(NULL, write_serial_char, s, ap);
+    va_end(ap);
 }
 
 int serial_received(uint16_t PORT) {
-   return port_byte_in(PORT + 5) & 1;
+    return port_byte_in(PORT + 5) & 1;
 }
  
 char read_serial(uint16_t PORT) {
-   while (serial_received(PORT) == 0);
- 
-   return port_byte_in(PORT);
+    while (serial_received(PORT) == 0);
+
+    return port_byte_in(PORT);
 }

@@ -1,6 +1,5 @@
 #include "../drivers/screen.h"
 #include "../debug/printf.h"
-#include "../libc/string.h"
 #include "../cpu/ports.h"
 #include "rtc.h"
 
@@ -71,43 +70,35 @@ datetime_t rtc_get_date_time() {
 }
 
 void rtctime() {
-    static char *year, *month, *day, *hour, *minutes, *seconds;
-
     datetime_t rtc_time = rtc_get_date_time();
 
-    int_to_ascii(rtc_time.year, year);
-    kprintf("Year: %s\n", year);
+    kprintf("Year: %i\n", rtc_time.year);
 
-    int_to_ascii(rtc_time.month, month);
     kprint("Month: ");
 
     if (rtc_time.month > 0 && rtc_time.month < 10) {
         kprint("0");
     }
 
-    kprintf("%s\n", month);
+    kprintf("%i\n", rtc_time.month);
 
-    int_to_ascii(rtc_time.day, day);
-    kprintf("Day: %s\n", day);
+    kprintf("Day: %i\n", rtc_time.day);
 
-    int_to_ascii(rtc_time.time.hour, hour);
-    kprintf("Hour: %s\n", hour);
+    kprintf("Hour: %i\n", rtc_time.time.hour);
 
-    int_to_ascii(rtc_time.time.minute, minutes);
     kprint("Minute: ");
 
     if (rtc_time.time.minute < 10) {
         kprint("0");
     }
 
-    kprintf("%s\n", minutes);
+    kprintf("%i\n", rtc_time.time.minute);
 
-    int_to_ascii(rtc_time.time.second, seconds);
     kprint("Second: ");
 
     if (rtc_time.time.second < 10) {
         kprint("0");
     }
 
-    kprintf("%s\n", seconds);
+    kprintf("%i\n", rtc_time.time.second);
 }
