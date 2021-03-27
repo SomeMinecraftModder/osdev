@@ -68,8 +68,8 @@ void write_serial_char(char word) {
     write_serial_port_char(COM1, word);
 }
 
-void qemu_printf(char *s, ...) {
-    va_list(ap);
+void printf_serial(char *s, ...) {
+    va_list ap;
     va_start(ap, s);
     vsprintf(NULL, write_serial_char, s, ap);
     va_end(ap);

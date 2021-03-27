@@ -7,8 +7,8 @@
 
 void write_serial_port(uint16_t PORT, char *word);
 int serial_install_port(uint16_t PORT);
+void printf_serial(char *s, ...);
 char read_serial(uint16_t PORT);
-void qemu_printf(char *s, ...);
 void write_serial(char *word);
 void serial_install();
 

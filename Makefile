@@ -8,15 +8,15 @@ HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h libc/*.h debug/*.h)
 # Nice syntax for file extension replacement
 OBJ = ${C_SOURCES:.c=.o cpu/interrupt.o boot/boot.o boot/header.o boot/gdt.o}
 
-os-image.iso: os-image.bin grub.cfg
+os-image.iso: os-image.elf grub.cfg
 	${ECHO} "ISO Build Date: $$(${DATE})" > make.log
 	${MKDIR} -p iso/boot/grub/
-	${CP} os-image.bin iso/boot/
+	${CP} os-image.elf iso/boot/
 	${CP} grub.cfg iso/boot/grub/
 	${ISOMAKER} -o os-image.iso iso
 
-os-image.bin: linker.ld ${OBJ}
-	${LD} -T $^ -o os-image.bin -nostdlib
+os-image.elf: linker.ld ${OBJ}
+	${LD} -T $^ -o os-image.elf -nostdlib
 
 # Generic rules for wildcards
 # To make an object, always compile from its .c
@@ -33,5 +33,5 @@ os-image.bin: linker.ld ${OBJ}
 celan: clean
 
 clean:
-	rm -rf *.bin *.dis *.elf *.o *.iso os-image.bin os-image.iso
+	rm -rf *.bin *.dis *.elf *.o *.iso os-image.elf os-image.iso
 	rm -rf boot/*.bin boot/*.o cpu/*.o drivers/*.o kernel/*.o libc/*.o iso/
