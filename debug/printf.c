@@ -15,8 +15,6 @@ void vsprintf(char *str, void (*putchar)(char), char *format, va_list arg) {
 
 void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *pos, va_list arg) {
     char c;
-    uint8_t buf[512];
-    memory_set(buf, 0, 512);
 
     while ((c = *format++) != 0) {
         if (c == '%') {
@@ -32,8 +30,23 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                     }
                     format++;
                     break;
-                case 'd':
-                case 'u':
+
+                case 'o':
+                    if (str) {
+                        int number = (int) va_arg(arg, int);
+                        char *t = octal_to_ascii(number);
+                        strcpy(str + (*pos), t);
+                        *pos = *pos + strlen(t);
+                    } else {
+                        int number = (int) va_arg(arg, int);
+                        char *t = octal_to_ascii(number);
+                        while (*t) {
+                            putchar(*t);
+                            t++;
+                        }
+                    }
+                    break;
+
                 case 'x':
                     if (str) {
                         char t[16] = "";
@@ -51,6 +64,7 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                         }
                     }
                     break;
+
                 case 'X':
                     if (str) {
                         char t[16] = "";
@@ -68,6 +82,7 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                         }
                     }
                     break;
+
                 case 'c':
                     if (str) {
                         *(str + *pos) = (char)va_arg(arg, int);
@@ -76,6 +91,7 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                         (*putchar)((char)va_arg(arg, int));
                     }
                     break;
+
                 case 's':
                     if (str) {
                         char *t = (char *) va_arg(arg, int);
@@ -89,6 +105,8 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                         }
                     }
                     break;
+
+                case 'd':
                 case 'i':
                     if (str) {
                         static char *t;
@@ -107,10 +125,12 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                     }
                     break;
                 default:
+                    putchar('%');
                     break;
             }
             continue;
         }
+
         if (str) {
             *(str + *pos) = c;
             *pos = *pos + 1;
@@ -124,5 +144,12 @@ void kprintf(char *s, ...) {
     va_list ap;
     va_start(ap, s);
     vsprintf(NULL, putchar, s, ap);
+    va_end(ap);
+}
+
+void sprintf(char *buf, char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vsprintf(buf, NULL, fmt, ap);
     va_end(ap);
 }

@@ -1,5 +1,9 @@
-global loader
 global stack_ptr
+global dis_ints
+global enb_ints
+global int_halt
+global loader
+global halt
 
 extern kernel_main
 extern gdt_descriptor
@@ -58,19 +62,19 @@ test_multiboot:
     jmp error
 
 test_cpuid:
-    pushfd               ; Store the FLAGS-register.
-    pop eax              ; Restore the A-register.
-    mov ecx, eax         ; Set the C-register to the A-register.
-    xor eax, 1 << 21     ; Flip the ID-bit, which is bit 21.
-    push eax             ; Store the A-register.
-    popfd                ; Restore the FLAGS-register.
-    pushfd               ; Store the FLAGS-register.
-    pop eax              ; Restore the A-register.
-    push ecx             ; Store the C-register.
-    popfd                ; Restore the FLAGS-register.
-    xor eax, ecx         ; Do a XOR-operation on the A-register and the C-register.
-    jz .no_cpuid         ; The zero flag is set, no CPUID.
-    ret                  ; CPUID is available for use.
+    pushfd ; Store the FLAGS-register.
+    pop eax ; Restore the A-register.
+    mov ecx, eax ; Set the C-register to the A-register.
+    xor eax, 1 << 21 ; Flip the ID-bit, which is bit 21.
+    push eax ; Store the A-register.
+    popfd ; Restore the FLAGS-register.
+    pushfd ; Store the FLAGS-register.
+    pop eax ; Restore the A-register.
+    push ecx ; Store the C-register.
+    popfd ; Restore the FLAGS-register.
+    xor eax, ecx ; Do a XOR-operation on the A-register and the C-register.
+    jz .no_cpuid ; The zero flag is set, no CPUID.
+    ret ; CPUID is available for use.
 
 .no_cpuid:
     mov al, "1"
@@ -85,11 +89,6 @@ error:
     mov byte  [0xB800A], al
     hlt
 
-global dis_ints
-global enb_ints
-global int_halt
-global halt
-
 enb_ints:
     sti
 
@@ -102,9 +101,6 @@ int_halt:
 halt:
     cli
     hlt
-
-.Lhang:
-    jmp halt
 
 .end:
 
