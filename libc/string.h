@@ -13,6 +13,7 @@ char *strcpy(char *src, char *dst);
 char *strcat(char *dst, char *src);
 int strcmp(char s1[], char s2[]);
 void append(char s[], char n);
+char *octal_to_ascii(int n);
 int ascii_to_int(char *str);
 void swap(int a, int b);
 void backspace(char s[]);

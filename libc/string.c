@@ -56,6 +56,21 @@ void hex_to_ascii_upper(int n, char str[]) {
     }
 }
 
+char *octal_to_ascii(int n) {
+    static char representation[] = "01234567";
+    static char buffer[50];
+    char *ptr;
+
+    ptr = &buffer[49];
+    *ptr = '\0';
+
+    do {
+        *--ptr = representation[n % 8];
+        n /= 8;
+    } while (n != 0);
+    return (ptr);
+}
+
 int ascii_to_int(char *str) {
     int value = 0;
     while (isdigit(*str)) {
