@@ -16,18 +16,15 @@ os-image.iso: os-image.elf grub.cfg
 	${ISOMAKER} -o os-image.iso iso
 
 os-image.elf: linker.ld ${OBJ}
-	${LD} -T $^ -o os-image.elf -nostdlib
+	${CC} -T $^ -o os-image.elf ${LDFLAGS}
 
 # Generic rules for wildcards
 # To make an object, always compile from its .c
 %.o: %.c ${HEADERS}
-	${CC} ${CFLAGS} -Os -c $< -o $@
+	${CC} -c $< -o $@ ${CFLAGS}
 
 %.o: %.asm
 	${NASM} $< -f elf -o $@
-
-%.bin: %.asm
-	${NASM} $< -f bin -o $@
 
 # Alias for common mistakes
 celan: clean
