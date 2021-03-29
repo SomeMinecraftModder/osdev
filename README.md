@@ -17,6 +17,7 @@ This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tu
 ```
 ┌───boot # Boot files, includes GDT, Multiboot headers and Boot file.
 ├───cpu # Files related to the CPU, like ports or interrupts.
+├───debug # Files used for debugging purposes.
 ├───drivers # As the name states, are drivers like the keyboard or screen driver.
 ├───iso # Folder created after successful build. Includes bin file (The OS) and grub.cfg (Grub configuration file).
 │   └───boot
