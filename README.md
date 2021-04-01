@@ -34,6 +34,7 @@ Firstly, you need to build an `i386-elf-gcc` cross-compiler, you can get build i
 Then, you will need Grub bootloader and the image builder which are generally distributed on 2 different packages:
 - `grub-pc-bin`
 - `grub-mkrescue`
+
 You can get that packages from your distro package manager.
 
 After cross-compiler successful build, you build the OS with the following instructions:
