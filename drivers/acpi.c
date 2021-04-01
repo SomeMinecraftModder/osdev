@@ -50,7 +50,7 @@ uint32_t *acpi_check_rsdp_tr(uint32_t *ptr) {
    uint32_t i;
 
    if (memcmp(sig, rsdp, 8) == 0) {
-      // Check checksum rsdpd
+      // Check checksum RSDPD
       bptr = (byte *) ptr;
       for (i = 0; i < sizeof(struct RSDPtr); i++) {
          check += *bptr;
@@ -125,13 +125,14 @@ int acpi_enable() {
             }
             sleep(10);
          }
-         if (PM1b_CNT != 0)
-            for (; i < 300; i++ ) {
+         if (PM1b_CNT != 0) {
+            for (; i < 300; i++) {
                if ((port_word_in((uint32_t) PM1b_CNT) &SCI_EN) == 1) {
                   break;
                }
                sleep(10);
             }
+         }
          if (i < 300) {
             kprint_gok();
             kprint("Enabling ACPI.\n");
@@ -176,7 +177,7 @@ int acpi_init() {
    if (ptr != NULL && acpi_check_header(ptr, "RSDT") == 0) {
       // The RSDT contains an unknown number of pointers to ACPI tables
       int entrys = *(ptr + 1);
-      entrys = (entrys-36) / 4;
+      entrys = (entrys - 36) / 4;
       ptr += 36 / 4; // Skip header information
 
       while (0 < entrys--) {
@@ -197,7 +198,7 @@ int acpi_init() {
                // Check if \_S5 was found
                if (dsdtLength > 0) {
                   // Check for valid AML structure
-                  if ((*(S5Addr-1) == 0x08 || (*(S5Addr-2) == 0x08 && *(S5Addr-1) == '\\')) && *(S5Addr+4) == 0x12 ) {
+                  if ((*(S5Addr - 1) == 0x08 || (*(S5Addr - 2) == 0x08 && *(S5Addr - 1) == '\\')) && *(S5Addr + 4) == 0x12) {
                      S5Addr += 5;
                      S5Addr += ((*S5Addr &0xC0)>>6) + 2; // Calculate PkgLength size
 
@@ -265,7 +266,7 @@ void acpi_power_off() {
       port_word_out((uint32_t) PM1b_CNT, SLP_TYPb | SLP_EN);
    }
 
-   PANIC("ACPI poweroff failed.\n", "acpi.c", 268);
+   PANIC("ACPI poweroff failed.\n", "acpi.c", 269);
 }
 
 void acpi_install() {
