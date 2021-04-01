@@ -1,10 +1,10 @@
-#include "isr.h"
-#include "idt.h"
-#include "../drivers/screen.h"
 #include "../drivers/keyboard.h"
+#include "../drivers/screen.h"
 #include "../libc/string.h"
 #include "timer.h"
 #include "ports.h"
+#include "idt.h"
+#include "isr.h"
 
 isr_t interrupt_handlers[256];
 
@@ -157,7 +157,7 @@ void irq_install() {
     // IRQ0: timer
     kprint_gok();
     kprint("Setting the timer.\n");
-    init_timer(50);
+    init_timer(100);
     // IRQ1: keyboard
     init_keyboard();
 }

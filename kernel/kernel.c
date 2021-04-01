@@ -6,6 +6,7 @@
 
 #include "../drivers/screen.h"
 #include "../drivers/serial.h"
+#include "../drivers/acpi.h"
 #include "../cpu/isr.h"
 #include "kernel.h"
 #include "panic.h"
@@ -15,6 +16,7 @@ void kernel_main() {
     clear_screen();
     isr_install();
     irq_install();
+    acpi_install();
     serial_install(); // COM1
     write_serial("\nCOM1 successfully initialized.\n\n");
 

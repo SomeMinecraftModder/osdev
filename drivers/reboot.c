@@ -9,11 +9,11 @@ void reboot() {
         r_int = port_byte_in(0x64);
     }
 
-    port_byte_out(0x64, 0xFE); // pulse CPU reset line
+    port_byte_out(0x64, 0xFE); // Pulse CPU reset line
 
 loop:
-    halt(); // if that did not work, halt the CPU
-    goto loop; // if a NMI is received, halt again
+    halt(); // If that did not work, halt the CPU
+    goto loop; // If a NMI is received, halt again
 }
 
 void shutdown_vm() {
