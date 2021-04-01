@@ -1,8 +1,8 @@
 #include "../drivers/screen.h"
 #include "../kernel/panic.h"
-#include "../libc/string.h"
 #include "../cpu/ports.h"
 #include "../cpu/timer.h"
+#include "../libc/mem.h"
 #include <stddef.h>
 #include "acpi.h"
 

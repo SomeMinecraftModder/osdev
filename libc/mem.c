@@ -1,18 +1,18 @@
 #include "mem.h"
 
-void memory_copy(uint8_t *source, uint8_t *dest, int nbytes) {
+void memcpy(uint8_t *source, uint8_t *dest, int nbytes) {
     int i;
     for (i = 0; i < nbytes; i++) {
         *(dest + i) = *(source + i);
     }
 }
 
-void memory_set(uint8_t *dest, uint8_t val, uint32_t len) {
+void memset(uint8_t *dest, uint8_t val, uint32_t len) {
     uint8_t *temp = (uint8_t *)dest;
     for ( ; len != 0; len--) *temp++ = val;
 }
 
-void memory_move(uint8_t *source, uint8_t *dest, int nbytes) {
+void memmove(uint8_t *source, uint8_t *dest, int nbytes) {
     uint8_t *p = (uint8_t *)source;
     uint8_t *q = (uint8_t *)dest;
     uint8_t *end = p + nbytes;
@@ -29,6 +29,21 @@ void memory_move(uint8_t *source, uint8_t *dest, int nbytes) {
             *q++ = *p++;
         }
     }
+}
+
+int memcmp(void *s1, void *s2, size_t n) {
+    uint8_t *byte1 = (uint8_t *)s1;
+    uint8_t *byte2 = (uint8_t *)s2;
+    while ((*byte1 == *byte2) && (n > 0)) {
+        ++byte1;
+        ++byte2;
+        --n;
+    }
+
+    if (n == 0) {
+        return 0;
+    }
+    return *byte1 - *byte2;
 }
 
 

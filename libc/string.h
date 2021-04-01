@@ -1,13 +1,10 @@
 #ifndef STRINGS_H
 #define STRINGS_H
 
-#include <stddef.h>
-
 char *strncpy(char *src, char *dst, int n);
 char *strncat(char *dst, char *src, int n);
 void hex_to_ascii_upper(int n, char str[]);
 int strncmp(char s1[], char s2[], int n);
-int memcmp(void *s1, void *s2, size_t n);
 int startswith(char *str, char *accept);
 void int_to_ascii(int n, char str[]);
 void hex_to_ascii(int n, char str[]);
