@@ -1,5 +1,6 @@
 #include "../drivers/screen.h"
 #include "../drivers/reboot.h"
+#include "../drivers/acpi.h"
 #include "../debug/printf.h"
 #include "../libc/string.h"
 #include "../drivers/rtc.h"
@@ -23,8 +24,8 @@ void shell(char *input) {
         dis_print = 1;
     } else if (strcmp(input, "reboot") == 0) {
         reboot();
-    } else if (strcmp(input, "shutdownvm") == 0) {
-        shutdown_vm();
+    } else if (strcmp(input, "shutdown") == 0) {
+        acpi_power_off();
     } else if (strcmp(input, "cpuinfo") == 0) {
         cpudetect();
     } else if (strcmp(input, "rtc") == 0) {
@@ -47,8 +48,7 @@ void shell(char *input) {
             "\"rtc\" to get the current time (in UTC).\n"
             "\"reboot\": to reboot your computer.\n"
             "\"echo [argument]\": to print something on the screen.\n"
-            "\"shutdownvm\": to shutdown if you're using a VM.\n"
-            "(There's no shutdown yet for real machines)\n");
+            "\"shutdown\": to shutdown your computer.\n");
     }
 
     if (dis_print == 0) {

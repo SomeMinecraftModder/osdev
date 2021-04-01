@@ -7,8 +7,9 @@ A simple OS which have various features:
 - Serial ports (COM1, COM2, COM3, COM4)
 - Keyboard
 - Multiboot (Can be booted by GNU Grub)
-- Small memory manager (unfinished)
+- Small memory manager (Unfinished)
 - RTC (Real Time Clock)
+- ACPI (Can shutdown your computer)
 - And more.
 
 This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tutorial) and some other OSes with GPL compatible license.

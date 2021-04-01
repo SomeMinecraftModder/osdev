@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include "string.h"
 #include <stdint.h>
-#include <stddef.h>
 
 bool isdigit(char c) {
     return c >= '0' && c <= '9';
@@ -196,4 +195,19 @@ char *strtruncate(char *str, int n) {
     if (n > len) l = len;
     str[len-l] = '\0';
     return str;
+}
+
+int memcmp(void *s1, void *s2, size_t n) {
+    uint8_t *byte1 = (uint8_t *)s1;
+    uint8_t *byte2 = (uint8_t *)s2;
+    while ((*byte1 == *byte2) && (n > 0)) {
+        ++byte1;
+        ++byte2;
+        --n;
+    }
+
+    if (n == 0) {
+        return 0;
+    }
+    return *byte1 - *byte2;
 }

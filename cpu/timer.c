@@ -4,6 +4,7 @@
 #include "isr.h"
 
 uint32_t tick = 0;
+uint32_t hz = 0;
 
 static void timer_callback(registers_t *regs) {
     tick++;
@@ -11,6 +12,7 @@ static void timer_callback(registers_t *regs) {
 }
 
 void init_timer(uint32_t freq) {
+    hz = freq;
     // Install the function we just wrote
     register_interrupt_handler(IRQ0, timer_callback);
 
@@ -22,4 +24,9 @@ void init_timer(uint32_t freq) {
     port_byte_out(0x43, 0x36); // Command port
     port_byte_out(0x40, low);
     port_byte_out(0x40, high);
+}
+
+void sleep(int sec) {
+    uint32_t end = tick + sec * hz;
+    while(tick < end);
 }

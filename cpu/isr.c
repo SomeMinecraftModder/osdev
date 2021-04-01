@@ -157,7 +157,7 @@ void irq_install() {
     // IRQ0: timer
     kprint_gok();
     kprint("Setting the timer.\n");
-    init_timer(50);
+    init_timer(100);
     // IRQ1: keyboard
     init_keyboard();
 }
