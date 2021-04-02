@@ -16,16 +16,14 @@ int serial_install_port(uint16_t PORT) {
     port_byte_out(PORT + 4, 0x1E); // Set in loopback mode, test the serial chip
     port_byte_out(PORT + 0, 0xAE); // Test serial chip (send byte 0xAE and check if serial returns same byte)
 
+    uint8_t result = port_byte_in(PORT + 0);
+
     // Check if serial is faulty (i.e: not same byte as sent)
-    if (port_byte_in(PORT + 0) != 0xAE) {
+    if (result != 0xAE) {
         kprint_rfail();
         kprint("No Serial Port.\n");
         return 1;
-    }
-
-    port_byte_out(PORT + 0, 0xAE); // Test again
-
-    if (port_byte_in(PORT + 0) == 0xAE) {
+    } else if (result == 0xAE) {
         kprint_gok();
         kprint("Installing Serial Ports.\n");
     }
