@@ -31,10 +31,17 @@ This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tu
 ## Building
 Firstly, you need to build an `i386-elf-gcc` cross-compiler, you can get build instructions [here](https://wiki.osdev.org/GCC_Cross-Compiler) (WARNING: The build proccess of your cross-compiler can take various hours depending on your Hardware).
 
+Then, you will need Grub bootloader and the image builder which are generally distributed on 2 different packages:
+- `grub-pc-bin`
+- `grub-mkrescue`
+
+You can get that packages from your distro package manager.
+
 After cross-compiler successful build, you build the OS with the following instructions:
 
-1. Modify the `Makefile.config` file to point to your cross-compiler.
-2. Build using an POSIX compliant `make`.
+1. Modify the `Makefile.config` file to point to your cross-compiler. [This](https://github.com/Sebastian-byte/osdev/blob/main/Makefile.config#L7) line.
+2. Modify `Makefile.config` again to point your grub-mkrescue executable. [This](https://github.com/Sebastian-byte/osdev/blob/main/Makefile.config#L13) line.
+3. Build using an POSIX compliant `make`.
 
 You will get two files after an successful build:
 - os-image.elf

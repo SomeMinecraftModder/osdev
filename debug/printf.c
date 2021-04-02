@@ -1,6 +1,5 @@
 #include "../drivers/screen.h"
 #include "../libc/string.h"
-#include "../libc/mem.h"
 #include "printf.h"
 #include <stddef.h>
 

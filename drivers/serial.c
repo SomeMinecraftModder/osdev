@@ -48,7 +48,7 @@ void write_serial_port(uint16_t PORT, char *word) {
 
     while (*word != '\0') {
         if ((uint8_t) *word == 0xFF) {
-            write_serial(" [Error in string.]\n ");
+            write_serial(" [Error in string]\n ");
         }
         port_byte_out(PORT, *word);
         word++;
@@ -59,7 +59,7 @@ void write_serial_port_char(uint16_t PORT, char word) {
     while (is_transmit_empty(PORT) == 0);
 
     if ((uint8_t) word == 0xFF) {
-        write_serial(" [Error in string.]\n ");
+        write_serial(" [Error in string]\n ");
     }
     port_byte_out(PORT, word);
 }
