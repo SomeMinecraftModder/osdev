@@ -4,6 +4,6 @@
 #include <stdint.h>
 
 void init_timer(uint32_t freq);
-void sleep(int sec);
+void sleep(uint32_t sec);
 
 #endif

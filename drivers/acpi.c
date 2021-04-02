@@ -139,12 +139,12 @@ int acpi_enable() {
             return 0;
          } else {
             kprint_rfail();
-            kprint("Couldn't enable ACPI.\n");
+            kprint("Couldn't Enable ACPI.\n");
             return -1;
          }
       } else {
          kprint_rfail();
-         kprint("No known way to enable ACPI.\n");
+         kprint("No Known Way to Enable ACPI.\n");
          return -1;
       }
    } else {
