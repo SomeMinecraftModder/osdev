@@ -3,6 +3,7 @@
 
 #define BACKSPACE 0x0E
 #define CAPSLOCK 0x3A
+#define LSHIFT 0x2A
 #define ENTER 0x1C
 #define TAB 0x0F
 

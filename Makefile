@@ -32,4 +32,4 @@ celan: clean
 
 clean:
 	rm -rf *.bin *.dis *.elf *.o *.iso os-image.elf os-image.iso
-	rm -rf boot/*.o boot/*.o cpu/*.o drivers/*.o kernel/*.o libc/*.o iso/
+	rm -rf boot/*.o cpu/*.o debug/*.o drivers/*.o kernel/*.o libc/*.o iso/

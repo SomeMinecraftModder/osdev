@@ -25,7 +25,7 @@ void shell(char *input) {
     } else if (strcmp(input, "reboot") == 0) {
         reboot();
     } else if (strcmp(input, "shutdown") == 0) {
-        acpi_power_off();
+        acpi_shutdown();
     } else if (strcmp(input, "cpuinfo") == 0) {
         cpudetect();
     } else if (strcmp(input, "rtc") == 0) {
@@ -56,6 +56,6 @@ void shell(char *input) {
     } else if (dis_print == 1) {
         kprint("> ");
     } else {
-        PANIC("No valid value on dis_print variable.", "shell.c", 12);
+        PANIC("No Valid Value in \"dis_print\" Variable.", "shell.c", 13);
     }
 }
