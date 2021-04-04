@@ -29,6 +29,6 @@ void init_timer(uint32_t freq) {
 void sleep(uint32_t sec) {
     uint32_t end = tick + (sec * hz);
     while (tick < end) {
-        asm volatile("hlt");
+        asm volatile("sti//hlt//cli");
     }
 }

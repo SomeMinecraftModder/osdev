@@ -148,6 +148,8 @@ int acpi_enable() {
          return -1;
       }
    } else {
+      kprint_gok();
+      kprint("ACPI is Already Enabled.\n");
       return 0;
    }
 }

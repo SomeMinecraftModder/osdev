@@ -33,10 +33,7 @@ void shell(char *input) {
     } else if (strncmp(input, "echo ", 4) == 0) {
         int i;
         for (i = 5; i < strlen(input); ++i) {
-            char c[2];
-            c[0] = input[i];
-            c[1] = 0;
-            kprint(c);
+            putchar(input[i]);
         }
         kprint("\n");
     } else if (strcmp(input, "help") == 0) {

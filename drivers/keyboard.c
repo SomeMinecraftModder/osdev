@@ -84,7 +84,7 @@ static void keyboard_callback(registers_t *regs) {
             int i = 0;
             while (history[i] != 0) {
                 append(key_buffer, history[i]);
-                i++;
+                ++i;
             }
         }
     } else {
