@@ -39,17 +39,16 @@ void cpudetect() {
 
         if (edx & EDX_TSC)      kprint(" TSC");
         if (edx & EDX_MSR)      kprint(" MSR");
+        if (ecx & ECX_AVX)      kprint(" AVX");
+        if (ecx & ECX_F16C)     kprint(" F16C");
+        if (ecx & ECX_RDRAND)   kprint(" RDRAND");
+        if (edx & EDX_MMX)      kprint(" MMX");
         if (edx & EDX_SSE)      kprint(" SSE");
         if (edx & EDX_SSE2)     kprint(" SSE2");
         if (ecx & ECX_SSE3)     kprint(" SSE3");
         if (ecx & ECX_SSSE3)    kprint(" SSSE3");
         if (ecx & ECX_SSE41)    kprint(" SSE4.1");
         if (ecx & ECX_SSE42)    kprint(" SSE4.2");
-        if (ecx & ECX_AVX)      kprint(" AVX");
-        if (ecx & ECX_F16C)     kprint(" F16C");
-        if (ecx & ECX_RDRAND)   kprint(" RDRAND");
-
-        kprint("\n");
     }
 
     uint32_t largestExtendedFunc;
@@ -58,9 +57,17 @@ void cpudetect() {
     if (largestExtendedFunc >= 0x80000001) {
         cpuid(0x80000001, &eax, &ebx, &ecx, &edx);
 
+        if (ecx & ECX_SSE4A)    kprint(" SSE4A");
+        if (edx & EDX_3DNOW)    kprint(" 3DNow");
+        if (edx & EDX_3DNOWEXT) kprint(" 3DNowext");
+
+        kprint("\n");
+
         if (edx & EDX_64_BIT) {
             kprint("64-bit Architecture\n");
         }
+    } else {
+        kprint("\n");
     }
 
     if (largestExtendedFunc >= 0x80000004) {
