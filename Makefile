@@ -12,18 +12,22 @@ OBJ = ${C_SOURCES:.c=.o} ${ASM_SOURCES:.asm=.o}
 all: release
 
 debug: CFLAGS += -g
+debug: RELTYPE = Debug
 debug: os-image.iso
 
 release: CFLAGS += -Os
 release: LDFLAGS += -Os
+release: RELTYPE = Release
 release: os-image.iso
 
 reldebinfo: CFLAGS += -g -Os
 reldebinfo: LDFLAGS += -Os
+reldebinfo: RELTYPE = RelWithDebInfo
 reldebinfo: os-image.iso
 
 os-image.iso: os-image.elf grub.cfg
 	${ECHO} "ISO Build Date: $$(${DATE})" > make.log
+	${ECHO} "ISO Build Config: ${RELTYPE}" >> make.log
 	${MKDIR} -p iso/boot/grub/
 	${CP} os-image.elf iso/boot/
 	${CP} grub.cfg iso/boot/grub/
