@@ -1,5 +1,5 @@
 .POSIX:
-.PHONY: celan clean
+.PHONY: celan clean all debug reldebinfo release
 
 include Makefile.config
 
@@ -8,6 +8,19 @@ HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h libc/*.h debug/*.h)
 ASM_SOURCES = $(wildcard boot/*.asm cpu/*.asm)
 # Nice syntax for file extension replacement
 OBJ = ${C_SOURCES:.c=.o} ${ASM_SOURCES:.asm=.o}
+
+all: release
+
+debug: CFLAGS += -g
+debug: os-image.iso
+
+release: CFLAGS += -Os
+release: LDFLAGS += -Os
+release: os-image.iso
+
+reldebinfo: CFLAGS += -g -Os
+reldebinfo: LDFLAGS += -Os
+reldebinfo: os-image.iso
 
 os-image.iso: os-image.elf grub.cfg
 	${ECHO} "ISO Build Date: $$(${DATE})" > make.log
