@@ -10,6 +10,7 @@
 static int CapsLockStatus = 0;
 static char key_buffer[256];
 static int AzertyStatus = 0;
+static char *history = " ";
 
 // UpperCase Chars
 const char *sc_name[] = { "ERROR", "Esc", "1", "2", "3", "4", "5", "6",
@@ -62,6 +63,7 @@ static void keyboard_callback(registers_t *regs) {
     } else if (scancode == ENTER) {
         kprint("\n");
         user_input(key_buffer); // kernel-controlled function
+        strcpy(key_buffer, history);
         key_buffer[0] = '\0';
     } else if (scancode == CAPSLOCK) {
         // Toggle caps lock current status
@@ -75,6 +77,15 @@ static void keyboard_callback(registers_t *regs) {
             AzertyStatus = 1;
         } else {
             AzertyStatus = 0;
+        }
+    } else if (scancode == LSHIFT) {
+        if (key_buffer[0] == '\0') {
+            kprint(history);
+            int i = 0;
+            while (history[i] != 0) {
+                append(key_buffer, history[i]);
+                ++i;
+            }
         }
     } else {
         char letter;

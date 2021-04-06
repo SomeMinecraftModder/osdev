@@ -25,7 +25,7 @@ void shell(char *input) {
     } else if (strcmp(input, "reboot") == 0) {
         reboot();
     } else if (strcmp(input, "shutdown") == 0) {
-        acpi_power_off();
+        acpi_shutdown();
     } else if (strcmp(input, "cpuinfo") == 0) {
         cpudetect();
     } else if (strcmp(input, "rtc") == 0) {
@@ -33,10 +33,7 @@ void shell(char *input) {
     } else if (strncmp(input, "echo ", 4) == 0) {
         int i;
         for (i = 5; i < strlen(input); ++i) {
-            char c[2];
-            c[0] = input[i];
-            c[1] = 0;
-            kprint(c);
+            putchar(input[i]);
         }
         kprint("\n");
     } else if (strcmp(input, "help") == 0) {
@@ -48,7 +45,9 @@ void shell(char *input) {
             "\"rtc\" to get the current time (in UTC).\n"
             "\"reboot\": to reboot your computer.\n"
             "\"echo [argument]\": to print something on the screen.\n"
-            "\"shutdown\": to shutdown your computer.\n");
+            "\"shutdown\": to shutdown your computer.\n"
+            "Press Tab to enable AZERTY keyboard layout.\n"
+            "Press Left Shift to print last used command.\n");
     }
 
     if (dis_print == 0) {
@@ -56,6 +55,6 @@ void shell(char *input) {
     } else if (dis_print == 1) {
         kprint("> ");
     } else {
-        PANIC("No valid value on dis_print variable.", "shell.c", 12);
+        PANIC("No Valid Value in \"dis_print\" Variable.", "shell.c", 13);
     }
 }

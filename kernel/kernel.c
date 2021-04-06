@@ -18,7 +18,7 @@ void kernel_main() {
     irq_install();
     acpi_install();
     serial_install(); // COM1
-    write_serial("\nCOM1 successfully initialized.\n\n");
+    write_serial("\nCOM1 successfully initialized.\n\r\n");
 
     kprint("Boot success.\n"
         "\n");

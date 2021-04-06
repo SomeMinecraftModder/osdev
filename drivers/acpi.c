@@ -139,15 +139,17 @@ int acpi_enable() {
             return 0;
          } else {
             kprint_rfail();
-            kprint("Couldn't enable ACPI.\n");
+            kprint("Couldn't Enable ACPI.\n");
             return -1;
          }
       } else {
          kprint_rfail();
-         kprint("No known way to enable ACPI.\n");
+         kprint("No Known Way to Enable ACPI.\n");
          return -1;
       }
    } else {
+      kprint_gok();
+      kprint("ACPI is Already Enabled.\n");
       return 0;
    }
 }
@@ -252,7 +254,7 @@ int acpi_init() {
    return -1;
 }
 
-void acpi_power_off() {
+void acpi_shutdown() {
    // SCI_EN is set to 1 if ACPI shutdown is possible
    if (SCI_EN == 0) {
       return;
@@ -266,7 +268,7 @@ void acpi_power_off() {
       port_word_out((uint32_t) PM1b_CNT, SLP_TYPb | SLP_EN);
    }
 
-   PANIC("ACPI poweroff failed.\n", "acpi.c", 269);
+   PANIC("ACPI Shutdown Failed.\n", "acpi.c", 269);
 }
 
 void acpi_install() {

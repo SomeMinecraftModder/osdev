@@ -30,6 +30,7 @@
 #define ECX_AVX                         (1 << 28)   // AVX Instructions
 #define ECX_F16C                        (1 << 29)   // 16-bit Floating Point Instructions
 #define ECX_RDRAND                      (1 << 30)   // RDRAND Instruction
+#define ECX_SSE4A                       (1 << 6)    // Streaming SIMD Extensions 4A
 
 #define EDX_FPU                         (1 << 0)    // Floating-Point Unit On-Chip
 #define EDX_VME                         (1 << 1)    // Virtual 8086 Mode Extensions
@@ -65,6 +66,8 @@
 #define EDX_1GB_PAGE                    (1 << 26)   // 1 GB Pages
 #define EDX_RDTSCP                      (1 << 27)   // RDTSCP and IA32_TSC_AUX
 #define EDX_64_BIT                      (1 << 29)   // 64-bit Architecture
+#define EDX_3DNOWEXT                    (1 << 30)   // Extended 3DNow
+#define EDX_3DNOW                       (1 << 31)   // 3DNow Feature
 
 void cpudetect();
 

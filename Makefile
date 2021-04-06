@@ -1,5 +1,5 @@
 .POSIX:
-.PHONY: celan clean
+.PHONY: celan clean all debug reldebinfo release
 
 include Makefile.config
 
@@ -9,8 +9,25 @@ ASM_SOURCES = $(wildcard boot/*.asm cpu/*.asm)
 # Nice syntax for file extension replacement
 OBJ = ${C_SOURCES:.c=.o} ${ASM_SOURCES:.asm=.o}
 
+all: release
+
+debug: CFLAGS += -g
+debug: RELTYPE = Debug
+debug: os-image.iso
+
+release: CFLAGS += -Os
+release: LDFLAGS += -Os
+release: RELTYPE = Release
+release: os-image.iso
+
+reldebinfo: CFLAGS += -g -Os
+reldebinfo: LDFLAGS += -Os
+reldebinfo: RELTYPE = RelWithDebInfo
+reldebinfo: os-image.iso
+
 os-image.iso: os-image.elf grub.cfg
 	${ECHO} "ISO Build Date: $$(${DATE})" > make.log
+	${ECHO} "ISO Build Config: ${RELTYPE}" >> make.log
 	${MKDIR} -p iso/boot/grub/
 	${CP} os-image.elf iso/boot/
 	${CP} grub.cfg iso/boot/grub/
@@ -32,4 +49,4 @@ celan: clean
 
 clean:
 	rm -rf *.bin *.dis *.elf *.o *.iso os-image.elf os-image.iso
-	rm -rf boot/*.o boot/*.o cpu/*.o drivers/*.o kernel/*.o libc/*.o iso/
+	rm -rf boot/*.o cpu/*.o debug/*.o drivers/*.o kernel/*.o libc/*.o iso/

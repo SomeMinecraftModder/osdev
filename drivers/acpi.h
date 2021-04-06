@@ -9,7 +9,7 @@ typedef unsigned short word;
 
 uint32_t *acpi_check_rsdp_tr(uint32_t *ptr);
 uint32_t *acpi_get_rsdp_tr();
-void acpi_power_off();
+void acpi_shutdown();
 void acpi_install();
 int acpi_enable();
 int acpi_init();

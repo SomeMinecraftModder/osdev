@@ -37,11 +37,14 @@ Then, you will need Grub bootloader and the image builder which are generally di
 
 You can get that packages from your distro package manager.
 
+Finally, you will need the NASM compiler, you can get it from your distro package manager.
+
 After cross-compiler successful build, you build the OS with the following instructions:
 
-1. Modify the `Makefile.config` file to point to your cross-compiler. [This](https://github.com/Sebastian-byte/osdev/blob/main/Makefile.config#L7) line.
-2. Modify `Makefile.config` again to point your grub-mkrescue executable. [This](https://github.com/Sebastian-byte/osdev/blob/main/Makefile.config#L13) line.
-3. Build using an POSIX compliant `make`.
+1. Modify the `Makefile.config` file to point to your cross-compiler. [This](https://github.com/Sebastian-byte/osdev/blob/main/Makefile.config#L6) line.
+2. Modify `Makefile.config` to point your `nasm` executable. [This](https://github.com/Sebastian-byte/osdev/blob/main/Makefile.config#L9) line.
+3. Modify `Makefile.config` again to point your `grub-mkrescue` executable. [This](https://github.com/Sebastian-byte/osdev/blob/main/Makefile.config#L12) line.
+4. Build using an POSIX compliant `make`.
 
 You will get two files after an successful build:
 - os-image.elf
