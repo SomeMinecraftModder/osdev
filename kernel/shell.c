@@ -45,7 +45,9 @@ void shell(char *input) {
             "\"rtc\" to get the current time (in UTC).\n"
             "\"reboot\": to reboot your computer.\n"
             "\"echo [argument]\": to print something on the screen.\n"
-            "\"shutdown\": to shutdown your computer.\n");
+            "\"shutdown\": to shutdown your computer.\n"
+            "Press Tab to enable AZERTY keyboard layout.\n"
+            "Press Left Shift to print last used command.\n");
     }
 
     if (dis_print == 0) {
