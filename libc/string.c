@@ -1,11 +1,7 @@
-#include <stdbool.h>
 #include "string.h"
 #include <stdint.h>
-#include <stddef.h>
 
-bool isdigit(char c) {
-    return c >= '0' && c <= '9';
-}
+int isdigit(int c);
 
 /**
  * K&R implementation
@@ -68,32 +64,42 @@ char *octal_to_ascii(int n) {
         *--ptr = representation[n % 8];
         n /= 8;
     } while (n != 0);
+
     return (ptr);
 }
 
-int ascii_to_int(char *str) {
+int ascii_to_int(const char *str) {
     int value = 0;
+
     while (isdigit(*str)) {
         value *= 10;
         value += (*str) - '0';
         str++;
     }
+
     return value;
+}
+
+int isdigit(int c) {
+    return c >= '0' && c <= '9';
 }
 
 int startswith(char *str, char *accept) {
     size_t s = strlen(accept);
+
     for (size_t i = 0; i < s; ++i) {
         if (*str != *accept) return 0;
         str++;
         accept++;
     }
+
     return 1;
 }
 
 // K&R
 void reverse(char s[]) {
     int c, i, j;
+
     for (i = 0, j = strlen(s)-1; i < j; i++, j--) {
         c = s[i];
         s[i] = s[j];
@@ -128,65 +134,80 @@ void backspace(char s[]) {
 
 /* K&R 
  * Returns <0 if s1<s2, 0 if s1==s2, >0 if s1>s2 */
-int strcmp(char s1[], char s2[]) {
+int strcmp(const char s1[], const char s2[]) {
     int i;
+
     for (i = 0; s1[i] == s2[i]; i++) {
         if (s1[i] == '\0') return 0;
     }
+
     return s1[i] - s2[i];
 }
 
-int strncmp(char s1[], char s2[], int n) {
+int strncmp(const char s1[], const char s2[], size_t n) {
     int i;
+
     for (i = 0; n && s1[i] == s2[i]; ++i, --n) {
         if (s1[i] == '\0') return 0;
     }
+
     return (s1[i] - s2[i]);
 }
 
 // K&R
-int strlen(char s[]) {
+size_t strlen(const char s[]) {
     int i = 0;
+
     while (s[i] != '\0') {
         ++i;
     }
+
     return i;
 }
 
-char *strcpy(char *src, char *dst) {
-    char *ptr = dst;
-    while (*src != '\0') {
-        *ptr++ = *src++;
+char *strcpy(char *dest, const char *src) {
+    char c;
+    char *ptr = dest;
+
+    while ((c = *src++)) {
+        *ptr++ = c;
     }
+
     *ptr = '\0';
-    return dst;
+    return dest;
 }
 
-char *strncpy(char *src, char *dst, int n) {
-    char *ptr = dst;
+char *strncpy(char *dest, const char *src, size_t n) {
+    char *ptr = dest;
+
     while (*src != '\0' && n--) {
         *ptr++ = *src++;
     }
+
     *ptr = '\0';
-    return dst;
+    return dest;
 }
 
-char *strcat(char *dst, char *src) {
-    char *ptr = dst + strlen(dst);
+char *strcat(char *dest, const char *src) {
+    char *ptr = dest + strlen(dest);
+
     while (*src != '\0') {
         *ptr++ = *src++;
     }
+
     *ptr = '\0';
-    return dst;
+    return dest;
 }
 
-char *strncat(char *dst, char *src, int n) {
-    char *ptr = dst + strlen(dst);
+char *strncat(char *dest, const char *src, size_t n) {
+    char *ptr = dest + strlen(dest);
+
     while (*src != '\0' && n--) {
         *ptr++ = *src++;
     }
+
     *ptr = '\0';
-    return dst;
+    return dest;
 }
 
 char *strtruncate(char *str, int n) {

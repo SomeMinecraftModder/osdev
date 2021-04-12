@@ -3,11 +3,32 @@
 #include "ports.h"
 #include "isr.h"
 
+uint32_t secboot = 0;
+uint32_t minboot = 0;
+uint32_t hourboot = 0;
+
 volatile uint32_t tick = 0;
 uint32_t hz = 0;
 
+static void timer_update() {
+    if ((tick % hz) == 0) {
+        secboot += 1;
+    }
+
+    if (secboot == 60) {
+        minboot += 1;
+        secboot = 0;
+    }
+
+    if (minboot == 60) {
+        hourboot += 1;
+        minboot = 0;
+    }
+}
+
 static void timer_callback(registers_t *regs) {
     tick++;
+    timer_update();
     UNUSED(regs);
 }
 

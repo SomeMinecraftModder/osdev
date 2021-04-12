@@ -31,7 +31,7 @@ void shell(char *input) {
     } else if (strcmp(input, "rtc") == 0) {
         rtctime();
     } else if (strncmp(input, "echo ", 4) == 0) {
-        int i;
+        size_t i;
         for (i = 5; i < strlen(input); ++i) {
             putchar(input[i]);
         }

@@ -63,7 +63,7 @@ static void keyboard_callback(registers_t *regs) {
     } else if (scancode == ENTER) {
         kprint("\n");
         user_input(key_buffer); // kernel-controlled function
-        strcpy(key_buffer, history);
+        strcpy(history, key_buffer);
         key_buffer[0] = '\0';
     } else if (scancode == CAPSLOCK) {
         // Toggle caps lock current status
@@ -111,5 +111,25 @@ static void keyboard_callback(registers_t *regs) {
 }
 
 void init_keyboard() {
-   register_interrupt_handler(IRQ1, keyboard_callback);
+    // Disable keyboard
+    port_byte_out(0x64, 0xAD);
+    port_byte_out(0x64, 0xA7);
+
+    // Send test command
+    port_byte_out(0x64, 0xAA);
+
+    // Read result and check it
+    int testres = port_byte_in(0x60);
+    if (testres == 0x55) {
+        kprint_gok();
+        kprint("Enabling keyboard.\n");
+    } else {
+        kprint_rfail();
+        kprint("Error enabling keyboard.\n");
+    }
+
+    // Enable keyboard
+    port_byte_out(0x64, 0xAE);
+    port_byte_out(0x64, 0xA8);
+    register_interrupt_handler(IRQ1, keyboard_callback);
 }

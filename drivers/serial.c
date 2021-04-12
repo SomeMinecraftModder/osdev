@@ -25,7 +25,7 @@ int serial_install_port(uint16_t PORT) {
         return 1;
     } else if (result == 0xAE) {
         kprint_gok();
-        kprint("Installing Serial Ports.\n");
+        kprint("Installing serial ports.\n");
     }
 
     // If serial is not faulty set it in normal operation mode
