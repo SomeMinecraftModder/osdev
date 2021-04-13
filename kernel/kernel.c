@@ -13,11 +13,16 @@
 #include "shell.h"
 
 void kernel_main() {
+    // Clear the screen
     clear_screen();
+    // Enable ISRs (Interrupt Service Routines)
     isr_install();
+    // Install interrupts
     irq_install();
+    // Enable ACPI (Advanced Configuration and Power Interface)
     acpi_install();
-    serial_install(); // COM1
+    // Enable serial port (COM1)
+    serial_install();
     write_serial("\nCOM1 successfully initialized.\n\r\n");
 
     kprint("Boot success.\n"

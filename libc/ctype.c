@@ -1,19 +1,5 @@
 #include "ctype.h"
 
-int tolower(int c) {
-    if (c >= 'A' && c <= 'Z') {
-        c = c + 'a' - 'A';
-    }
-    return c;
-}
-
-int toupper(int c) {
-    if (c >= 'a' && c <= 'z') {
-        c = c - 'a' + 'A';
-    }
-    return c;
-}
-
 int isblank(int c) {
     return c == '\t' || c == ' ';
 }
@@ -42,12 +28,12 @@ int isspace(int c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
-int isxdigit(int c) {
-    return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
-}
-
 int isgraph(int c) {
     return isprint(c) && c != ' ';
+}
+
+int isxdigit(int c) {
+    return isdigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
 }
 
 int isalpha(int c) {
@@ -60,4 +46,18 @@ int isalnum(int c) {
 
 int ispunct(int c) {
     return isgraph(c) && !isalnum(c);
+}
+
+int tolower(int c) {
+    if (isupper(c)) {
+        c = c + 'a' - 'A';
+    }
+    return c;
+}
+
+int toupper(int c) {
+    if (islower(c)) {
+        c = c - 'a' + 'A';
+    }
+    return c;
 }

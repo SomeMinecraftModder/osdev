@@ -268,7 +268,7 @@ void acpi_shutdown() {
       port_word_out((uint32_t) PM1b_CNT, SLP_TYPb | SLP_EN);
    }
 
-   PANIC("ACPI Shutdown Failed.\n", "acpi.c", 271);
+   PANIC(__FILE__, __LINE__, "ACPI shutdown failed.");
 }
 
 void acpi_install() {

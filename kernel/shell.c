@@ -52,9 +52,9 @@ void shell(char *input) {
 
     if (!dis_print) {
         kprintf("You said: %s\n> ", input);
-    } else if (dis_print) {
+    } else if (dis_print == 1) {
         kprint("> ");
     } else {
-        PANIC("No Valid Value in \"dis_print\" Variable.", "shell.c", 13);
+        PANIC(__FILE__, __LINE__, "No valid value in \"dis_print\" variable.");
     }
 }

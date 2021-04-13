@@ -2,8 +2,9 @@
 #define PANIC_H
 
 #include <stdint.h>
+#include <stdarg.h>
 
-void PANIC(char *PANIC_MSG, char *file, uint32_t line);
+void PANIC(char *file, uint32_t line, char *PANIC_MSG, ...);
 extern int halt();
 
 #endif
