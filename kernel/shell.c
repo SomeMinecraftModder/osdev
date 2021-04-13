@@ -50,9 +50,9 @@ void shell(char *input) {
             "Press Left Shift to print last used command.\n");
     }
 
-    if (dis_print == 0) {
+    if (!dis_print) {
         kprintf("You said: %s\n> ", input);
-    } else if (dis_print == 1) {
+    } else if (dis_print) {
         kprint("> ");
     } else {
         PANIC("No Valid Value in \"dis_print\" Variable.", "shell.c", 13);

@@ -1,7 +1,6 @@
 #include "string.h"
 #include <stdint.h>
-
-int isdigit(int c);
+#include "ctype.h"
 
 /**
  * K&R implementation
@@ -78,10 +77,6 @@ int ascii_to_int(const char *str) {
     }
 
     return value;
-}
-
-int isdigit(int c) {
-    return c >= '0' && c <= '9';
 }
 
 int startswith(char *str, char *accept) {
