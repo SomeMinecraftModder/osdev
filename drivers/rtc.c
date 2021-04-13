@@ -1,6 +1,7 @@
 #include "../drivers/screen.h"
 #include "../debug/printf.h"
 #include "../cpu/ports.h"
+#include "../cpu/timer.h"
 #include "rtc.h"
 
 int century_register = 0x00;
@@ -101,4 +102,20 @@ void rtctime() {
     }
 
     kprintf("%i\n", rtc_time.time.second);
+
+    kprint("Time since boot: ");
+
+    kprintf("%i:", hourboot);
+
+    if (minboot < 10) {
+        kprint("0");
+    }
+
+    kprintf("%i:", minboot);
+
+    if (secboot < 10) {
+        kprint("0");
+    }
+
+    kprintf("%i\n", secboot);
 }

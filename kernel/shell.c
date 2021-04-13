@@ -31,7 +31,7 @@ void shell(char *input) {
     } else if (strcmp(input, "rtc") == 0) {
         rtctime();
     } else if (strncmp(input, "echo ", 4) == 0) {
-        int i;
+        size_t i;
         for (i = 5; i < strlen(input); ++i) {
             putchar(input[i]);
         }
@@ -50,9 +50,9 @@ void shell(char *input) {
             "Press Left Shift to print last used command.\n");
     }
 
-    if (dis_print == 0) {
+    if (!dis_print) {
         kprintf("You said: %s\n> ", input);
-    } else if (dis_print == 1) {
+    } else if (dis_print) {
         kprint("> ");
     } else {
         PANIC("No Valid Value in \"dis_print\" Variable.", "shell.c", 13);

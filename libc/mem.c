@@ -1,19 +1,25 @@
 #include "mem.h"
 
-void memcpy(uint8_t *source, uint8_t *dest, int nbytes) {
-    int i;
-    for (i = 0; i < nbytes; i++) {
-        *(dest + i) = *(source + i);
+void *memcpy(void *dest, const void *src, size_t nbytes) {
+    uint8_t *q = (uint8_t *)dest;
+    uint8_t *p = (uint8_t *)src;
+    uint8_t *end = p + nbytes;
+
+    while (p != end) {
+        *q++ = *p++;
     }
+
+    return dest;
 }
 
-void memset(uint8_t *dest, uint8_t val, uint32_t len) {
+void *memset(void *dest, uint8_t val, size_t len) {
     uint8_t *temp = (uint8_t *)dest;
     for (; len != 0; len--) *temp++ = val;
+    return dest;
 }
 
-void memmove(uint8_t *source, uint8_t *dest, int nbytes) {
-    uint8_t *p = (uint8_t *)source;
+void *memmove(void *dest, const void *src, size_t nbytes) {
+    uint8_t *p = (uint8_t *)src;
     uint8_t *q = (uint8_t *)dest;
     uint8_t *end = p + nbytes;
 
@@ -21,7 +27,7 @@ void memmove(uint8_t *source, uint8_t *dest, int nbytes) {
         p = end;
         q += nbytes;
 
-        while (p != source) {
+        while (p != src) {
             *--q = *--p;
         }
     } else {
@@ -29,9 +35,26 @@ void memmove(uint8_t *source, uint8_t *dest, int nbytes) {
             *q++ = *p++;
         }
     }
+
+    return dest;
 }
 
-int memcmp(void *s1, void *s2, size_t n) {
+void *memchr(const void *buf, int c, size_t n) {
+    uint8_t *p = (uint8_t *)buf;
+    uint8_t *end = p + n;
+
+    while (p != end) {
+        if (*p == c) {
+            return p;
+        }
+
+        ++p;
+    }
+
+    return 0;
+}
+
+int memcmp(const void *s1, const void *s2, size_t n) {
     uint8_t *byte1 = (uint8_t *)s1;
     uint8_t *byte2 = (uint8_t *)s2;
     while ((*byte1 == *byte2) && (n > 0)) {
