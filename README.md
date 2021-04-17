@@ -14,7 +14,7 @@ A simple OS which have various features:
 
 This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tutorial) and some other OSes with GPL compatible license.
 
-## Directory structure:
+## Directory structure\:
 ```lang-none
 ┌───boot # Boot files, includes GDT, Multiboot headers and Boot file.
 ├───cpu # Files related to the CPU, like ports or interrupts.
