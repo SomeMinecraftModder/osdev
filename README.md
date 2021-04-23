@@ -57,6 +57,6 @@ You will get two files after an successful build:
 
 You can use the `os-image.elf` file for debugging purposes.
 
-You can use the `os-image.iso` file to boot using an bootloader (GNU Grub by default, but you can use another Multiboot compliant bootloader).
+You can use the `os-image.iso` file to boot using a bootloader (GNU Grub by default, but you can use another Multiboot compliant bootloader).
 
 The default output format is `elf32-i386`.
