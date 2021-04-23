@@ -31,7 +31,7 @@ This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tu
 ## Building
 Firstly, you need to build an `i386-elf-gcc` cross-compiler, you can get build instructions [here](https://wiki.osdev.org/GCC_Cross-Compiler) (WARNING: The build proccess of your cross-compiler can take various hours depending on your Hardware).
 
-There are various versions available, here is a compatibility list:
+There are various GCC versions available, here is a compatibility list:
 -   \[✔\] GCC 10.2.0
 -   \[✔\] GCC 8.4.0
 -   \[✔\] GCC 4.9.1
