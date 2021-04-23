@@ -21,7 +21,7 @@ int serial_install_port(uint16_t PORT) {
     // Check if serial is faulty (i.e: not same byte as sent)
     if (result != 0xAE) {
         kprint_rfail();
-        kprint("No Serial Port.\n");
+        kprint("No serial port.\n");
         return 1;
     } else if (result == 0xAE) {
         kprint_gok();
@@ -31,6 +31,8 @@ int serial_install_port(uint16_t PORT) {
     // If serial is not faulty set it in normal operation mode
     // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
     port_byte_out(PORT + 4, 0x0F);
+
+    write_serial("\nCOM1 successfully initialized.\n\r\n");
 
     return 0;
 }
@@ -60,7 +62,7 @@ void write_serial_port_char(uint16_t PORT, char word) {
     while (is_transmit_empty(PORT) == 0);
 
     if ((uint8_t) word == 0xFF) {
-        write_serial(" [Error in string]\n ");
+        write_serial("[Error in character]\n");
     }
     port_byte_out(PORT, word);
 }

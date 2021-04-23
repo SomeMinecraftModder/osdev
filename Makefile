@@ -5,7 +5,7 @@ include Makefile.config
 
 C_SOURCES = $(wildcard kernel/*.c drivers/*.c cpu/*.c libc/*.c debug/*.c)
 HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h libc/*.h debug/*.h)
-ASM_SOURCES = $(wildcard boot/*.asm cpu/*.asm)
+ASM_SOURCES = $(wildcard boot/*.asm cpu/*.asm drivers/*.asm)
 # Nice syntax for file extension replacement
 OBJ = ${C_SOURCES:.c=.o} ${ASM_SOURCES:.asm=.o}
 

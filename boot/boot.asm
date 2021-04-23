@@ -2,7 +2,6 @@ global stack_ptr
 global dis_ints
 global enb_ints
 global int_halt
-global loader
 global halt
 
 extern kernel_main
@@ -10,7 +9,7 @@ extern gdt_descriptor
 extern CODE_SEG
 extern DATA_SEG 
 
-section .bootstrap_stack nobits write align=16
+section .bootstrap_stack nobits write
 align 16
 stack_bottom:
 resb 32768
@@ -19,18 +18,18 @@ stack_top:
 section .text
 [bits 32]
 
-STACKSIZE equ 0x4000
+STACKSIZE equ 4 * 1024
 
 global _start:function (_start.end - _start)
 
 _start:
-    mov esp, stack+STACKSIZE ; Point ESP to the start of the stack.
+    mov esp, stack + STACKSIZE ; Point ESP to the start of the stack.
+
+    mov [ebxb], ebx
 
     call test_multiboot
     call test_cpuid
 
-    push eax
-    push ebx
     lgdt [gdt_descriptor] ; Load the GDT descriptor
     jmp CODE_SEG:.setcs ; Set CS to our 32-bit flat code selector
     .setcs:
@@ -47,6 +46,7 @@ _start:
     mov ebp, 0x90000 ; Update the stack right at the top of the free space
     mov esp, ebp
 
+    push dword [ebxb]
     call kernel_main ; Calls the C function. The linker will know where it is placed in memory
     jmp $ ; Stay here when the kernel returns control to us (if ever)
 
@@ -83,7 +83,7 @@ test_cpuid:
 ; Prints `ERR: ` and the given error code to screen and hangs.
 ; parameter: error code (in ascii) in al
 error:
-    mov dword [0xB8000], 0x4F524F45
+    mov dword [0xB0000], 0x4F524F45
     mov dword [0xB8004], 0x4F3A4F52
     mov dword [0xB8008], 0x4F204F20
     mov byte  [0xB800A], al
@@ -105,7 +105,8 @@ halt:
 .end:
 
 section .bss
-align 4
+ebxb resw 1
+alignb 4
 stack:
   resb STACKSIZE
 stack_ptr:

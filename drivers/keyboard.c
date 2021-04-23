@@ -5,122 +5,239 @@
 #include "../cpu/isr.h"
 #include "keyboard.h"
 #include "screen.h"
-#include <stdint.h>
 
-static int CapsLockStatus = 0;
 static char key_buffer[256];
-static int AzertyStatus = 0;
 static char *history = " ";
+static int caps_lock = 0;
+static int azerty = 0;
+uint8_t last_scancode;
+uint8_t scancode;
 
-// UpperCase Chars
-const char *sc_name[] = { "ERROR", "Esc", "1", "2", "3", "4", "5", "6",
-    "7", "8", "9", "0", "-", "=", "Backspace", "Tab", "Q", "W", "E",
-        "R", "T", "Y", "U", "I", "O", "P", "[", "]", "Enter", "Lctrl",
-        "A", "S", "D", "F", "G", "H", "J", "K", "L", ";", "'", "`",
-        "LShift", "\\", "Z", "X", "C", "V", "B", "N", "M", ",", ".",
-        "/", "RShift", "Keypad *", "LAlt", "Spacebar", "CapsLock"};
-const char sc_ascii[] = { '?', '?', '1', '2', '3', '4', '5', '6',
-    '7', '8', '9', '0', '-', '=', '?', '?', 'Q', 'W', 'E', 'R', 'T', 'Y',
-        'U', 'I', 'O', 'P', '[', ']', '?', '?', 'A', 'S', 'D', 'F', 'G',
-        'H', 'J', 'K', 'L', ';', '\'', '`', '?', '\\', 'Z', 'X', 'C', 'V',
-        'B', 'N', 'M', ',', '.', '/', '?', '?', '?', ' ', '?'};
+// Uppercase characters
+const char sc_ascii[] = { '?', '?', '?', '?', '?', '?', '?', '?',
+    '?', '?', '?', '?', '?', '?', '?', '?', '`', '?', '?', '?', '?', 'Q',
+        '1', '?', '?', '?', 'Z', 'S', 'A', 'W', '2', '?', '?', 'C', 'X',
+        'D', 'E', '4', '3', '?', '?', ' ', 'V', 'F', 'T', 'R', '5', '?',
+        '?', 'N', 'B', 'H', 'G', 'Y', '6', '?', '?', '?', 'M', 'J', 'U',
+        '7', '8', '?', '?', ',', 'K', 'I', 'O', '0', '9', '?', '?', '.',
+        '/', 'L', ';', 'P', '-', '?', '?', '?', '\'', '?', '[', '=', '?',
+        '?', '?', '?', '?', ']', '?', '\\', '?', '?', '?', '?', '?', '?',
+        '?', '?', '?', '?', '?', '1', '?', '4', '7', '?', '?', '?', '0',
+        '.', '2', '5', '6', '8', '?', '?', '?', '+', '3', '-', '*', '9',
+        '?', '?', '?', '?', '?', '?'};
 
-// LowerCase Chars
-const char *Lsc_name[] = { "ERROR", "Esc", "1", "2", "3", "4", "5", "6",
-    "7", "8", "9", "0", "-", "=", "Backspace", "Tab", "q", "w", "e",
-        "r", "t", "y", "u", "i", "o", "p", "[", "]", "Enter", "Lctrl",
-        "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "`",
-        "LShift", "\\", "z", "x", "c", "v", "b", "n", "m", ",", ".",
-        "/", "RShift", "Keypad *", "LAlt", "Spacebar", "CapsLock"};
-const char Lsc_ascii[] = { '?', '?', '1', '2', '3', '4', '5', '6',
-    '7', '8', '9', '0', '-', '=', '?', '?', 'q', 'w', 'e', 'r', 't', 'y',
-        'u', 'i', 'o', 'p', '[', ']', '?', '?', 'a', 's', 'd', 'f', 'g',
-        'h', 'j', 'k', 'l', ';', '\'', '`', '?', '\\', 'z', 'x', 'c', 'v',
-        'b', 'n', 'm', ',', '.', '/', '?', '?', '?', ' ', '?'};
+// Lowercase characters
+const char Lsc_ascii[] = { '?', '?', '?', '?', '?', '?', '?', '?',
+    '?', '?', '?', '?', '?', '?', '?', '?', '`', '?', '?', '?', '?', 'q',
+        '1', '?', '?', '?', 'z', 's', 'a', 'w', '2', '?', '?', 'c', 'x',
+        'd', 'e', '4', '3', '?', '?', ' ', 'v', 'f', 't', 'r', '5', '?',
+        '?', 'n', 'b', 'h', 'g', 'y', '6', '?', '?', '?', 'm', 'j', 'u',
+        '7', '8', '?', '?', ',', 'k', 'i', 'o', '0', '9', '?', '?', '.',
+        '/', 'l', ';', 'p', '-', '?', '?', '?', '\'', '?', '[', '=', '?',
+        '?', '?', '?', '?', ']', '?', '\\', '?', '?', '?', '?', '?', '?',
+        '?', '?', '?', '?', '?', '1', '?', '4', '7', '?', '?', '?', '0',
+        '.', '2', '5', '6', '8', '?', '?', '?', '+', '3', '-', '*', '9',
+        '?', '?', '?', '?', '?', '?'};
 
 // Azerty variants
-const char sc_azerty[] = { '?', '?', '1', '2', '3', '4', '5', '6',
-    '7', '8', '9', '0', ')', '-', '?', '?', 'A', 'Z', 'E', 'R', 'T', 'Y',
-        'U', 'I', 'O', 'P', '[', ']', '?', '?', 'Q', 'S', 'D', 'F', 'G',
-        'H', 'J', 'K', 'L', 'M', '?', '`', '?', '\\', 'W', 'X', 'C', 'V',
-        'B', 'N', ',', ';', ':', '~', '?', '?', '?', ' ', '?'};
+const char sc_azerty[] = { '?', '?', '?', '?', '?', '?', '?', '?',
+    '?', '?', '?', '?', '?', '?', '?', '?', '`', '?', '?', '?', '?', 'A',
+        '1', '?', '?', '?', 'W', 'S', 'Q', 'Z', '2', '?', '?', 'C', 'X',
+        'D', 'E', '4', '3', '?', '?', ' ', 'V', 'F', 'T', 'R', '5', '?',
+        '?', 'N', 'B', 'H', 'G', 'Y', '6', '?', '?', '?', ',', 'J', 'U',
+        '7', '8', '?', '?', ';', 'K', 'I', 'O', '0', '9', '?', '?', ':',
+        '~', 'L', 'M', 'P', ')', '?', '?', '?', '?', '?', '[', '=', '?',
+        '?', '?', '?', '?', ']', '?', '\\', '?', '?', '?', '?', '?', '?',
+        '?', '?', '?', '?', '?', '1', '?', '4', '7', '?', '?', '?', '0',
+        '.', '2', '5', '6', '8', '?', '?', '?', '+', '3', '-', '*', '9',
+        '?', '?', '?', '?', '?', '?'};
 
-const char Lsc_azerty[] = { '?', '?', '1', '2', '3', '4', '5', '6',
-    '7', '8', '9', '0', ')', '=', '?', '?', 'a', 'z', 'e', 'r', 't', 'y',
-        'u', 'i', 'o', 'p', '[', ']', '?', '?', 'q', 's', 'd', 'f', 'g',
-        'h', 'j', 'k', 'l', 'm', '?', '`', '?', '\\', 'w', 'x', 'c', 'v',
-        'b', 'n', ',', ';', ':', '~', '?', '?', '?', ' ', '?'};
+const char Lsc_azerty[] = { '?', '?', '?', '?', '?', '?', '?', '?',
+    '?', '?', '?', '?', '?', '?', '?', '?', '`', '?', '?', '?', '?', 'a',
+        '1', '?', '?', '?', 'w', 's', 'q', 'z', '2', '?', '?', 'c', 'x',
+        'd', 'e', '4', '3', '?', '?', ' ', 'v', 'f', 't', 'r', '5', '?',
+        '?', 'n', 'b', 'h', 'g', 'y', '6', '?', '?', '?', ',', 'j', 'u',
+        '7', '8', '?', '?', ';', 'k', 'i', 'o', '0', '9', '?', '?', ':',
+        '~', 'l', 'm', 'p', ')', '?', '?', '?', '?', '?', '[', '=', '?',
+        '?', '?', '?', '?', ']', '?', '\\', '?', '?', '?', '?', '?', '?',
+        '?', '?', '?', '?', '?', '1', '?', '4', '7', '?', '?', '?', '0',
+        '.', '2', '5', '6', '8', '?', '?', '?', '+', '3', '-', '*', '9',
+        '?', '?', '?', '?', '?', '?'};
 
 
 static void keyboard_callback(registers_t *regs) {
+    last_scancode = scancode;
     // The PIC leaves us the scancode in port 0x60
-    uint8_t scancode = port_byte_in(0x60);
+    scancode = port_byte_in(0x60);
 
-    if (scancode > SC_MAX) return;
-    if (scancode == BACKSPACE) {
-        kprint_backspace(key_buffer);
+    if (scancode > SC_MAX) {
+        return;
+    }
+
+    if (last_scancode == 0xF0) {
+        // An key was released
+    } else if (scancode == BACKSPACE) {
+        if (strlen(key_buffer) != 0) {
+            kprint_backspace();
+        }
         backspace(key_buffer);
     } else if (scancode == ENTER) {
         kprint("\n");
-        user_input(key_buffer); // kernel-controlled function
+        user_input(key_buffer); // Kernel-controlled function
         strcpy(history, key_buffer);
         key_buffer[0] = '\0';
     } else if (scancode == CAPSLOCK) {
         // Toggle caps lock current status
-        if (CapsLockStatus) {
-            CapsLockStatus = 0;
+        if (caps_lock) {
+            caps_lock = 0;
         } else {
-            CapsLockStatus = 1;
+            caps_lock = 1;
         }
     } else if (scancode == TAB) {
-        if (AzertyStatus == 0) {
-            AzertyStatus = 1;
+        if (azerty == 0) {
+            azerty = 1;
         } else {
-            AzertyStatus = 0;
+            azerty = 0;
         }
-    } else if (scancode == LSHIFT) {
-        if (key_buffer[0] == '\0') {
-            kprint(history);
-            int i = 0;
-            while (history[i] != 0) {
-                append(key_buffer, history[i]);
-                ++i;
+    } else if (last_scancode == 0xE0) {
+        if (scancode == 0x75) {
+            if (key_buffer[0] == '\0') {
+                kprint(history);
+                int i = 0;
+                while (history[i] != 0) {
+                    append(key_buffer, history[i]);
+                    ++i;
+                }
             }
+        }
+        if (scancode == 0x72) {
+            int e = strlen(key_buffer);
+            while (e > 0) {
+                kprint_backspace();
+                e--;
+            }
+            key_buffer[0] = '\0';
         }
     } else {
         char letter;
-        if (AzertyStatus == 1) {
+        if (azerty == 1) {
             letter = sc_azerty[(int)scancode];
         } else {
             letter = sc_ascii[(int)scancode];
         }
 
-        if (CapsLockStatus == 0) {
-            if (AzertyStatus == 1) {
+        if (caps_lock == 0) {
+            if (azerty == 1) {
                 letter = Lsc_azerty[(int)scancode];
             } else {
                 letter = Lsc_ascii[(int)scancode];
             }
         }
-        // Remember that kprint only accepts char[]
-        char str[2] = {letter, '\0'};
         append(key_buffer, letter);
-        kprint(str);
+        putchar(letter);
     }
     UNUSED(regs);
 }
 
 void init_keyboard() {
     // Disable keyboard
-    port_byte_out(0x64, 0xAD);
-    port_byte_out(0x64, 0xA7);
+    keybcon_write(0xAD);
+    keybcon_write(0xA7);
+
+    // Flush output buffer
+    port_byte_in(0x60);
+
+    keybcon_write(0x20);
+    // Store command byte
+    uint8_t byte = keyb_read();
+
+    keybcon_write(0x60);
+    // Clear "First PS/2 port interrupt" bit
+    keyb_write((byte & ~(1<<0)));
+
+    keybcon_write(0x60);
+    // Clear "Second PS/2 port interrupt" bit
+    keyb_write((byte & ~(1<<1)));
+
+    keybcon_write(0x60);
+    // Clear "First PS/2 port translation" bit
+    keyb_write((byte & ~(1<<6)));
+
+    keybcon_write(0x20);
+    // Store command byte
+    uint8_t byte1 = keyb_read();
 
     // Send test command
-    port_byte_out(0x64, 0xAA);
+    keybcon_write(0xAA);
 
-    // Read result and check it
-    int testres = port_byte_in(0x60);
+    // Read result
+    int testres = keyb_read();
+    int contestres;
+
+    // Restore command byte
+    keybcon_write(0x60);
+    keyb_write((byte1));
+
+    // Check self test result
     if (testres == 0x55) {
+        contestres = 1;
+    } else {
+        contestres = 0;
+    }
+
+    // Check if is dual channel
+    int dualchannel = 0;
+
+    if (byte & ~(1<<6)) {
+        dualchannel = 1;
+    }
+
+    // Test PS/2 ports
+    keybcon_write(0xAB);
+    int firstret = keyb_read();
+    int secondret = 1;
+
+    if (dualchannel) {
+        keybcon_write(0xA9);
+        secondret = keyb_read();
+    }
+
+    // Enable devices
+    keybcon_write(0xAE);
+
+    keybcon_write(0x20);
+    uint8_t byte2 = keyb_read();
+
+    keybcon_write(0x60);
+    keyb_write((byte2 & ~(2<<0)));
+
+    if (dualchannel) {
+        keybcon_write(0x60);
+        keyb_write((byte2 & ~(2<<1)));
+
+        keybcon_write(0xA8);
+    }
+
+    int devret1 = 0;
+    int devret2 = 0;
+
+    // Reset devices
+    keyb_write(0xFF);
+
+    // Ensure that device ports are clean
+    while (devret1 != 101) {
+        devret1 = keyb_read();
+    }
+
+    if (dualchannel) {
+        keybdual_write(0xFF);
+        while (devret2 != 101) {
+            devret2 = keyb_read();
+        }
+    }
+
+    if ((firstret == 0x00 && secondret == 1 && contestres == 1)
+            || (firstret == 0x00 && secondret == 0x00 && contestres == 1)) {
         kprint_gok();
         kprint("Enabling keyboard.\n");
     } else {
@@ -128,8 +245,50 @@ void init_keyboard() {
         kprint("Error enabling keyboard.\n");
     }
 
-    // Enable keyboard
-    port_byte_out(0x64, 0xAE);
-    port_byte_out(0x64, 0xA8);
     register_interrupt_handler(IRQ1, keyboard_callback);
+}
+
+uint8_t keybcon_read() {
+    return port_byte_in(0x64);
+}
+
+void keybcon_write(uint8_t cmd) {
+    while (1) {
+        if ((keybcon_read() & 2) == 0) {
+            break;
+        }
+    }
+
+    port_byte_out(0x64, cmd);
+}
+
+uint8_t keyb_read() {
+    if ((keybcon_read() & 1) == 0) {
+        // A generic error code
+        return 101;
+    }
+
+    return port_byte_in(0x60);
+}
+
+void keyb_write(uint8_t cmd) {
+    while (1) {
+        if ((keybcon_read() & 2) == 0) {
+            break;
+        }
+    }
+
+    port_byte_out(0x60, cmd);
+}
+
+void keybdual_write(uint8_t cmd) {
+    keybcon_write(0xD4);
+
+    while (1) {
+        if ((keybcon_read() & 2) == 0) {
+            break;
+        }
+    }
+
+    port_byte_out(0x60, cmd);
 }

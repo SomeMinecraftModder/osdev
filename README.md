@@ -55,8 +55,8 @@ You will get two files after an successful build:
 -   os-image.elf
 -   os-image.iso
 
-You can use the `os-image.elf` file to debug and/or to boot OS directly (QEMU: `-kernel` option).
+You can use the `os-image.elf` file for debugging purposes.
 
 You can use the `os-image.iso` to boot using an bootloader (GNU Grub by default, but you can use another Multiboot compliant bootloader).
 
-The default output format is `elf32-i386` but you can change it in `linker.ld` (not recommended).
+The default output format is `elf32-i386`.

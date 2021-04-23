@@ -6,52 +6,52 @@
 #include <stddef.h>
 #include "acpi.h"
 
-dword *SMI_CMD;
-byte ACPI_ENABLE;
-byte ACPI_DISABLE;
-dword *PM1a_CNT;
-dword *PM1b_CNT;
-word SLP_TYPa;
-word SLP_TYPb;
-word SLP_EN;
-word SCI_EN;
-byte PM1_CNT_LEN;
+uint32_t *SMI_CMD;
+uint8_t ACPI_ENABLE;
+uint8_t ACPI_DISABLE;
+uint32_t *PM1a_CNT;
+uint32_t *PM1b_CNT;
+uint16_t SLP_TYPa;
+uint16_t SLP_TYPb;
+uint16_t SLP_EN;
+uint16_t SCI_EN;
+uint8_t PM1_CNT_LEN;
 
 struct RSDPtr {
-   byte Signature[8];
-   byte CheckSum;
-   byte OemID[6];
-   byte Revision;
-   dword *RsdtAddress;
+   uint8_t Signature[8];
+   uint8_t CheckSum;
+   uint8_t OemID[6];
+   uint8_t Revision;
+   uint32_t *RsdtAddress;
 };
 
 struct FACP {
-   byte Signature[4];
-   dword Length;
-   byte unneded1[40 - 8];
-   dword *DSDT;
-   byte unneded2[48 - 44];
-   dword *SMI_CMD;
-   byte ACPI_ENABLE;
-   byte ACPI_DISABLE;
-   byte unneded3[64 - 54];
-   dword *PM1a_CNT_BLK;
-   dword *PM1b_CNT_BLK;
-   byte unneded4[89 - 72];
-   byte PM1_CNT_LEN;
+   uint8_t Signature[4];
+   uint32_t Length;
+   uint8_t unneded1[40 - 8];
+   uint32_t *DSDT;
+   uint8_t unneded2[48 - 44];
+   uint32_t *SMI_CMD;
+   uint8_t ACPI_ENABLE;
+   uint8_t ACPI_DISABLE;
+   uint8_t unneded3[64 - 54];
+   uint32_t *PM1a_CNT_BLK;
+   uint32_t *PM1b_CNT_BLK;
+   uint8_t unneded4[89 - 72];
+   uint8_t PM1_CNT_LEN;
 };
 
 // Check if the given address has a valid header
 uint32_t *acpi_check_rsdp_tr(uint32_t *ptr) {
    char *sig = "RSD PTR ";
    struct RSDPtr *rsdp = (struct RSDPtr *) ptr;
-   byte *bptr;
-   byte check = 0;
-   uint32_t i;
 
    if (memcmp(sig, rsdp, 8) == 0) {
+      uint8_t *bptr;
+      uint8_t check = 0;
+      uint32_t i;
       // Check checksum RSDPD
-      bptr = (byte *) ptr;
+      bptr = (uint8_t *) ptr;
       for (i = 0; i < sizeof(struct RSDPtr); i++) {
          check += *bptr;
          bptr++;
@@ -139,17 +139,17 @@ int acpi_enable() {
             return 0;
          } else {
             kprint_rfail();
-            kprint("Couldn't Enable ACPI.\n");
+            kprint("Couldn't enable ACPI.\n");
             return -1;
          }
       } else {
          kprint_rfail();
-         kprint("No Known Way to Enable ACPI.\n");
+         kprint("No known way to enable ACPI.\n");
          return -1;
       }
    } else {
       kprint_gok();
-      kprint("ACPI is Already Enabled.\n");
+      kprint("ACPI is already enabled.\n");
       return 0;
    }
 }

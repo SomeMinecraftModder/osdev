@@ -1,4 +1,5 @@
 #include "../libc/function.h"
+#include "../libc/string.h"
 #include "timer.h"
 #include "ports.h"
 #include "isr.h"
@@ -47,7 +48,15 @@ void init_timer(uint32_t freq) {
     port_byte_out(0x40, high);
 }
 
-void sleep(uint32_t sec) {
+void sleep(uint32_t ms) {
+    char *s = " ";
+    uint32_t end = tick + atoi(strtruncate(int_to_ascii(ms, s), 1));
+    while (tick < end) {
+        asm volatile("sti//hlt//cli");
+    }
+}
+
+void sleepsec(uint32_t sec) {
     uint32_t end = tick + (sec * hz);
     while (tick < end) {
         asm volatile("sti//hlt//cli");

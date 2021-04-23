@@ -7,23 +7,25 @@
 #include "../drivers/screen.h"
 #include "../drivers/serial.h"
 #include "../drivers/acpi.h"
+#include "../libc/mem.h"
 #include "../cpu/isr.h"
 #include "kernel.h"
-#include "panic.h"
 #include "shell.h"
 
-void kernel_main() {
-    // Clear the screen
-    clear_screen();
-    // Enable ISRs (Interrupt Service Routines)
+void kernel_main(uint32_t addr) {
+    extern char sbss, ebss;
+    memset(&sbss, 0, &ebss - &sbss);
+    // Point to Multiboot info table and clear screen
+    video_init(addr);
+    // Set IDT gates, remap the PIC and install the IRQs
     isr_install();
-    // Install interrupts
+    /* Enable interrupts, set the timer interrupt (IRQ0)
+     * and the keyboard interrupt (IRQ1) */
     irq_install();
-    // Enable ACPI (Advanced Configuration and Power Interface)
+    // Map ACPI tables and send the enable command
     acpi_install();
-    // Enable serial port (COM1)
+    // Test serial port (COM1)
     serial_install();
-    write_serial("\nCOM1 successfully initialized.\n\r\n");
 
     kprint("Boot success.\n"
         "\n");

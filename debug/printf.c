@@ -19,17 +19,6 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
         if (c == '%') {
             c = *format++;
             switch (c) {
-                // Handle calls like printf("%08x", 0xaa);
-                case '0':
-                    // Get the number between 0 and (x/d/p...)
-                    c = *format;
-                    while (!is_format_letter(c)) {
-                        format++;
-                        c = *format;
-                    }
-                    format++;
-                    break;
-
                 case 'o':
                     if (str) {
                         int number = (int) va_arg(arg, int);
@@ -123,8 +112,9 @@ void vsprintf_helper(char *str, void (*putchar)(char), char *format, uint32_t *p
                         }
                     }
                     break;
+
                 default:
-                    putchar('%');
+                    putchar(c);
                     break;
             }
             continue;

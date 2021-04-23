@@ -8,6 +8,7 @@ extern uint32_t minboot;
 extern uint32_t hourboot;
 
 void init_timer(uint32_t freq);
-void sleep(uint32_t sec);
+void sleepsec(uint32_t sec);
+void sleep(uint32_t ms);
 
 #endif

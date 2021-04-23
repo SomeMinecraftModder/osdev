@@ -20,7 +20,7 @@ void shell(char *input) {
         uint32_t page = kmalloc(1000, 1, &phys_addr);
         kprintf("Page: %X, physical address: %X\n", page, phys_addr);
     } else if (strcmp(input, "clear") == 0) {
-        clear_screen();
+        clear_screen(black);
         dis_print = 1;
     } else if (strcmp(input, "reboot") == 0) {
         reboot();
@@ -47,7 +47,7 @@ void shell(char *input) {
             "\"echo [argument]\": to print something on the screen.\n"
             "\"shutdown\": to shutdown your computer.\n"
             "Press Tab to enable AZERTY keyboard layout.\n"
-            "Press Left Shift to print last used command.\n");
+            "Press the Up key to print last used command.\n");
     }
 
     if (!dis_print) {

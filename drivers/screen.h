@@ -1,26 +1,29 @@
-#ifndef SCREEN_H
-#define SCREEN_H
+#ifndef FRAMEBUFFER_H
+#define FRAMEBUFFER_H
 
-#define VIDEO_ADDRESS 0xB8000
-#define MAX_ROWS 25
-#define MAX_COLS 80
-#define WHITE_ON_BLACK 0x0F
-#define GREEN_ON_BLACK 0x0A
-#define RED_ON_BLACK 0x04
-#define RED_ON_WHITE 0xF4
+#include "../kernel/multiboot.h"
+#include <stdint.h>
+#include <stddef.h>
+#include "psf.h"
 
-// Screen I/O ports
-#define REG_SCREEN_CTRL 0x3D4
-#define REG_SCREEN_DATA 0x3D5
+typedef struct {
+    uint8_t r, g, b;
+} Color;
 
-// Public kernel API
-void kprint_at(char *message, int col, int row, int color);
-void enable_cursor(int cursor_start, int cursor_end);
-void move_cursor(int col, int row);
-void kprint_dec(int message);
-void kprint(char *message);
+extern multiboot_info_t *mbi;
+extern Color white;
+extern Color green;
+extern Color black;
+extern Color red;
+
+void putchar_at(char c, int position_x, int position_y, Color color);
+void kprint_color(char *string, Color color);
+void putchar_color(char c, Color color);
+void video_init(uint32_t addr);
+Color rgb(int r, int g, int b);
+void kprint(char *string);
 void kprint_backspace();
-void disable_cursor();
+void kprint_newline();
 void putchar(char c);
 void clear_screen();
 void kprint_rfail();

@@ -1,11 +1,14 @@
 #include "string.h"
-#include <stdint.h>
 #include "ctype.h"
+#include "mem.h"
+
+#define BITOP(a,b,op) \
+ ((a)[(size_t)(b) / (8*sizeof *(a))] op (size_t)1 << ((size_t)(b) % (8*sizeof *(a))))
 
 /**
  * K&R implementation
  */
-void int_to_ascii(int n, char str[]) {
+char *int_to_ascii(int n, char str[]) {
     int i, sign;
     if ((sign = n) < 0) n = -n;
     i = 0;
@@ -17,25 +20,29 @@ void int_to_ascii(int n, char str[]) {
     str[i] = '\0';
 
     reverse(str);
+
+    return (str);
 }
 
-void hex_to_ascii(int n, char str[]) {
+char *hex_to_ascii(int n, char str[]) {
     append(str, '0');
     append(str, 'x');
     char zeros = 0;
 
-    int32_t tmp;
     int i;
     for (i = 28; i >= 0; i -= 4) {
+        int32_t tmp;
         tmp = (n >> i) & 0xF;
         if (tmp == 0 && zeros == 0) continue;
         zeros = 1;
         if (tmp >= 0xA) append(str, tmp - 0xA + 'a');
         else append(str, tmp + '0');
     }
+
+    return (str);
 }
 
-void hex_to_ascii_upper(int n, char str[]) {
+char *hex_to_ascii_upper(int n, char str[]) {
     append(str, '0');
     append(str, 'x');
     char zeros = 0;
@@ -49,41 +56,56 @@ void hex_to_ascii_upper(int n, char str[]) {
         if (tmp >= 0xA) append(str, tmp - 0xA + 'A');
         else append(str, tmp + '0');
     }
+
+    return (str);
 }
 
 char *octal_to_ascii(int n) {
     static char representation[] = "01234567";
     static char buffer[50];
-    char *ptr;
+    char *str;
 
-    ptr = &buffer[49];
-    *ptr = '\0';
+    str = &buffer[49];
+    *str = '\0';
 
     do {
-        *--ptr = representation[n % 8];
+        *--str = representation[n % 8];
         n /= 8;
     } while (n != 0);
 
-    return (ptr);
+    return (str);
 }
 
-int ascii_to_int(const char *str) {
-    int value = 0;
-
-    while (isdigit(*str)) {
-        value *= 10;
-        value += (*str) - '0';
+int atoi(const char *str) {
+    int n = 0, neg = 0;
+    while (isspace(*str)) {
         str++;
     }
 
-    return value;
+    switch (*str) {
+        case '-':
+            neg = 1;
+            break;
+
+        case '+':
+            str++;
+            break;
+    }
+
+    while (isdigit(*str)) {
+        n = 10 * n - (*str++ - '0');
+    }
+
+    return neg ? n : -n;
 }
 
 int startswith(char *str, char *accept) {
     size_t s = strlen(accept);
 
     for (size_t i = 0; i < s; ++i) {
-        if (*str != *accept) return 0;
+        if (*str != *accept) {
+            return 0;
+        }
         str++;
         accept++;
     }
@@ -91,23 +113,17 @@ int startswith(char *str, char *accept) {
     return 1;
 }
 
-// K&R
-void reverse(char s[]) {
-    int c, i, j;
+char *reverse(char s[]) {
+    int i, j;
 
-    for (i = 0, j = strlen(s)-1; i < j; i++, j--) {
+    for (i = 0, j = strlen(s) - 1; i < j; i++, j--) {
+        int c;
         c = s[i];
         s[i] = s[j];
         s[j] = c;
     }
-}
 
-int max(int a, int b) {
-    return (a > b) ? a : b;
-}
-
-int min(int a, int b) {
-    return (a > b) ? b : a;
+    return s;
 }
 
 void swap(int a, int b) {
@@ -143,14 +159,15 @@ int strncmp(const char s1[], const char s2[], size_t n) {
     int i;
 
     for (i = 0; n && s1[i] == s2[i]; ++i, --n) {
-        if (s1[i] == '\0') return 0;
+        if (s1[i] == '\0') {
+            return 0;
+        }
     }
 
     return (s1[i] - s2[i]);
 }
 
-// K&R
-size_t strlen(const char s[]) {
+size_t strlen(const char *s) {
     int i = 0;
 
     while (s[i] != '\0') {
@@ -160,16 +177,27 @@ size_t strlen(const char s[]) {
     return i;
 }
 
-char *strcpy(char *dest, const char *src) {
-    char c;
-    char *ptr = dest;
+size_t strnlen(const char *s, int32_t n) {
+    const char *p = memchr(s, 0, n);
+    return p ? p - s : n;
+}
 
-    while ((c = *src++)) {
-        *ptr++ = c;
+char *strcpy(char *restrict dest, const char *restrict src) {
+    stpcpy(dest, src);
+    return dest;
+}
+
+size_t strlcpy(char *d, const char *s, size_t n) {
+    char *d0 = d;
+
+    if (!n--) {
+        goto finish;
     }
 
-    *ptr = '\0';
-    return dest;
+    for (; n && (*d = *s); n--, s++, d++);
+    *d = 0;
+finish:
+    return d - d0 + strlen(s);
 }
 
 char *strncpy(char *dest, const char *src, size_t n) {
@@ -183,26 +211,146 @@ char *strncpy(char *dest, const char *src, size_t n) {
     return dest;
 }
 
-char *strcat(char *dest, const char *src) {
-    char *ptr = dest + strlen(dest);
+char *stpcpy(char *restrict d, const char *restrict s) {
+    for (; (*d = *s); s++, d++);
 
-    while (*src != '\0') {
-        *ptr++ = *src++;
-    }
+    return d;
+}
 
-    *ptr = '\0';
+char *stpncpy(char *restrict d, const char *restrict s, size_t n) {
+    for (; n && (*d = *s); n--, s++, d++);
+    memset(d, 0, n);
+    return d;
+}
+
+char *strcat(char *restrict dest, const char *restrict src) {
+    strcpy(dest + strlen(dest), src);
     return dest;
 }
 
-char *strncat(char *dest, const char *src, size_t n) {
+char *strncat(char *restrict dest, const char *restrict src, size_t n) {
     char *ptr = dest + strlen(dest);
 
-    while (*src != '\0' && n--) {
+    while (n && *src) {
+        n--;
         *ptr++ = *src++;
     }
 
-    *ptr = '\0';
+    *ptr++ = '\0';
     return dest;
+}
+
+char *strstr(const char *in, const char *str) {
+    char c;
+    uint32_t len;
+
+    c = *str++;
+    if (!c) {
+        return (char *) in;
+    }
+
+    len = strlen(str);
+    do {
+        char sc;
+
+        do {
+            sc = *in++;
+            if (!sc) {
+                return (char *) 0;
+            }
+        } while (sc != c);
+    } while (strncmp(in, str, len) != 0);
+
+    return (char *) (in - 1);
+}
+
+char *strchrnul(const char *s, int c) {
+    c = (uint8_t)c;
+    if (!c) {
+        return (char *)s + strlen(s);
+    }
+
+    for (; *s && *(uint8_t *)s != c; s++);
+    return (char *)s;
+}
+
+char *strchr(const char *s, int c) {
+    char *r = strchrnul(s, c);
+    return *(uint8_t *)r == (uint8_t)c ? r : 0;
+}
+
+char *strrchr(const char *s, int c) {
+    return memrchr(s, c, strlen(s) + 1);
+}
+
+size_t strspn(const char *s, const char *c) {
+    const char *a = s;
+    size_t byteset[32 / sizeof(size_t)] = { 0 };
+
+    if (!c[0]) {
+        return 0;
+    }
+
+    if (!c[1]) {
+        for (; *s == *c; s++);
+        return s - a;
+    }
+
+    for (; *c && BITOP(byteset, *(uint8_t *)c, |=); c++);
+    for (; *s && BITOP(byteset, *(uint8_t *)s, &); s++);
+    return s - a;
+}
+
+size_t strcspn(const char *s, const char *c) {
+    const char *a = s;
+    size_t byteset[32 / sizeof(size_t)];
+
+    if (!c[0] || !c[1]) {
+        return strchrnul(s, *c) - a;
+    }
+
+    memset(byteset, 0, sizeof byteset);
+    for (; *c && BITOP(byteset, *(uint8_t *)c, |=); c++);
+    for (; *s && !BITOP(byteset, *(uint8_t *)s, &); s++);
+    return s - a;
+}
+
+char *strtok(char *restrict s, const char *restrict sep) {
+    static char *p;
+    if (!s && !(s = p)) {
+        return NULL;
+    }
+
+    s += strspn(s, sep);
+    if (!*s) {
+        p = 0;
+    }
+
+    p = s + strcspn(s, sep);
+    if (*p) {
+        *p++ = 0;
+    } else {
+        p = 0;
+    }
+
+    return s;
+}
+
+char *strpbrk(const char *s, const char *b) {
+    s += strcspn(s, b);
+    return *s ? (char *)s : 0;
+}
+
+int strcoll(const char *l, const char *r) {
+    return strcmp(l, r);
+}
+
+size_t strxfrm(char *restrict dest, const char *restrict src, size_t n) {
+    size_t l = strlen(src);
+    if (n > l) {
+        strcpy(dest, src);
+    }
+    return l;
 }
 
 char *strtruncate(char *str, int n) {

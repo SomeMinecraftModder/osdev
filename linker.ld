@@ -1,42 +1,40 @@
 OUTPUT_FORMAT(elf32-i386)
-/* entry point of our kernel */
+/* Entry point of our kernel */
 ENTRY(_start)
 
 SECTIONS
 {
-	/* we need 1MB of space atleast */
+	/* We need 1MB of space at least */
 	. = 1M;
+	start = .;
 
-	/* text section */
+	/* Text section */
 	.text BLOCK(4K) : ALIGN(4K)
 	{
 		*(.multiboot)
 		*(.text)
 	}
 
-	/* read only data section */
+	/* Read only data section */
 	.rodata BLOCK(4K) : ALIGN(4K)
 	{
 		*(.rodata)
 	}
 
-	/* data section */
+	/* Data section */
 	.data BLOCK(4K) : ALIGN(4K)
 	{
 		*(.data)
 	}
 
-	/* bss section */
+	/* BSS section */
 	.bss BLOCK(4K) : ALIGN(4K)
 	{
 		sbss = .;
-		*(COMMON)
 		*(.bss)
 		ebss = .;
 	}
 
-	/* The compiler may produce other sections, by default it will put them in
-	a segment with the same name. Simply add stuff here as needed. */
 	.kend BLOCK(4K) : ALIGN(4K)
 	{
 		*(.kend)
@@ -51,4 +49,6 @@ SECTIONS
 		*(.eh_frame)
 		*(.note.gnu.build-id)
 	}
+
+	end = .;
 }

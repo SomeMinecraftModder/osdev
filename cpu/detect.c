@@ -21,7 +21,7 @@ void cpudetect() {
             (uint32_t *)(vendor + 8), (uint32_t *)(vendor + 4));
     vendor[12] = '\0';
 
-    kprintf("CPU Vendor: %s\n", vendor);
+    kprintf("CPU vendor: %s\n", vendor);
 
     if (largestStandardFunc >= 0x01) {
         cpuid(0x01, &eax, &ebx, &ecx, &edx);
@@ -88,6 +88,6 @@ void cpudetect() {
             ++p;
         }
 
-        kprintf("CPU Name: %s\n", p);
+        kprintf("CPU name: %s\n", p);
     }
 }
