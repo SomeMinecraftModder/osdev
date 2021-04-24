@@ -1,5 +1,5 @@
 #include "../libc/function.h"
-#include "../kernel/kernel.h"
+#include "../kernel/shell.h"
 #include "../libc/string.h"
 #include "../cpu/ports.h"
 #include "../cpu/isr.h"
@@ -83,7 +83,7 @@ static void keyboard_callback(registers_t *regs) {
         backspace(key_buffer);
     } else if (scancode == ENTER) {
         kprint("\n");
-        user_input(key_buffer); // Kernel-controlled function
+        shell(key_buffer);
         strcpy(history, key_buffer);
         key_buffer[0] = '\0';
     } else if (scancode == CAPSLOCK) {
@@ -111,10 +111,10 @@ static void keyboard_callback(registers_t *regs) {
             }
         }
         if (scancode == 0x72) {
-            int e = strlen(key_buffer);
-            while (e > 0) {
+            int i = strlen(key_buffer);
+            while (i > 0) {
                 kprint_backspace();
-                e--;
+                i--;
             }
             key_buffer[0] = '\0';
         }

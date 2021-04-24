@@ -9,8 +9,6 @@
 #include "../drivers/acpi.h"
 #include "../libc/mem.h"
 #include "../cpu/isr.h"
-#include "kernel.h"
-#include "shell.h"
 
 void kernel_main(uint32_t addr) {
     extern char sbss, ebss;
@@ -32,8 +30,4 @@ void kernel_main(uint32_t addr) {
 
     kprint("Type something, it will go through the kernel\n"
         "Type \"help\" to get started\n> ");
-}
-
-void user_input(char *input) {
-    shell(input);
 }
