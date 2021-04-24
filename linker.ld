@@ -50,5 +50,5 @@ SECTIONS
 		*(.note.gnu.build-id)
 	}
 
-	end = .;
+	end = ALIGN(4K);
 }

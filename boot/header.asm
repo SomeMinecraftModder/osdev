@@ -11,5 +11,5 @@ dd MAGIC
 dd FLAGS
 dd CHECKSUM
 dd 0, 0, 0, 0, 0
-dd 0
-dd 800, 600, 20
+dd 0 ; mode_type = 0 (linear graphics mode)
+dd 800, 600, 20 ; 800x600 @ 20 depth

@@ -8,7 +8,7 @@
 extern char start, end;
 
 void PANIC(char *file, uint32_t line, char *PANIC_MSG, ...) {
-    clear_screen();
+    clear_screen(black);
     kprint("[ ");
     kprint_color("PANIC", red);
     kprintf(" ]:\n");
