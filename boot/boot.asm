@@ -23,6 +23,10 @@ STACKSIZE equ 4 * 1024
 global _start:function (_start.end - _start)
 
 _start:
+    cli
+
+    finit ; Enable FPU
+
     mov esp, stack + STACKSIZE ; Point ESP to the start of the stack.
 
     mov [ebxb], ebx
@@ -40,8 +44,6 @@ _start:
     mov gs, ax
     mov ss, ax
 
-    mov esp, stack_top
-    cli
     mov esp, stack_top
     mov ebp, 0x90000 ; Update the stack right at the top of the free space
     mov esp, ebp
