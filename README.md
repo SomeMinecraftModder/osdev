@@ -7,9 +7,10 @@ A simple OS which have various features:
 -   Serial ports (COM1, COM2, COM3, COM4)
 -   Keyboard
 -   Multiboot (Can be booted by GNU Grub)
--   Small memory manager (Unfinished)
 -   RTC (Real Time Clock)
 -   ACPI (Can shutdown your computer)
+-   Paging
+-   Memory manager
 -   And more.
 
 This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tutorial) and some other OSes with GPL compatible license.
@@ -35,6 +36,7 @@ This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tu
 Firstly, you need to build an `i386-elf-gcc` cross-compiler, you can get build instructions [here](https://wiki.osdev.org/GCC_Cross-Compiler) (WARNING: The build proccess of your cross-compiler can take various hours depending on your Hardware).
 
 There are various GCC versions available, here is a compatibility list:
+-   \[✔\] GCC 11.1.0
 -   \[✔\] GCC 10.2.0
 -   \[✔\] GCC 8.4.0
 -   \[✔\] GCC 4.9.1
