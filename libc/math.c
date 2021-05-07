@@ -1,7 +1,8 @@
 #include "math.h"
 
 int abs(int a) {
-    // If input is less than 0, return the opposite of the input, otherwise return input
+    // If input is less than 0, return the opposite of the input, otherwise
+    // return input
     if (a < 0) {
         return -a;
     }

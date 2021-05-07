@@ -25,7 +25,8 @@ int iscntrl(int c) {
 }
 
 int isspace(int c) {
-    return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
+    return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' ||
+           c == '\r';
 }
 
 int isgraph(int c) {

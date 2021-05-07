@@ -1,5 +1,5 @@
-#include "../kernel/panic.h"
 #include "assert.h"
+#include "../kernel/panic.h"
 
 void assert(int retval) {
     if (!retval) {

@@ -1,8 +1,8 @@
+#include "timer.h"
 #include "../libc/function.h"
 #include "../libc/string.h"
-#include "timer.h"
-#include "ports.h"
 #include "isr.h"
+#include "ports.h"
 
 uint32_t secboot = 0;
 uint32_t minboot = 0;
@@ -49,8 +49,15 @@ void init_timer(uint32_t freq) {
 }
 
 void sleep(uint32_t ms) {
-    char *s = " ";
-    uint32_t end = tick + atoi(strtruncate(int_to_ascii(ms, s), 1));
+    char *s = "\0";
+    uint32_t end;
+
+    if (ms < 10) {
+        end = tick + ms;
+    } else {
+        end = tick + atoi(strtruncate(int_to_ascii(ms, s), 1));
+    }
+
     while (tick < end) {
         asm volatile("sti//hlt//cli");
     }

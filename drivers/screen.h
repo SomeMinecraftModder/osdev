@@ -2,9 +2,9 @@
 #define FRAMEBUFFER_H
 
 #include "../kernel/multiboot.h"
-#include <stdint.h>
-#include <stddef.h>
 #include "psf.h"
+#include <stddef.h>
+#include <stdint.h>
 
 typedef struct {
     uint8_t r, g, b;
@@ -16,10 +16,11 @@ extern Color green;
 extern Color black;
 extern Color red;
 
+void kprint_at(char *string, int position_x, int position_y, Color color);
 void putchar_at(char c, int position_x, int position_y, Color color);
 void kprint_color(char *string, Color color);
 void putchar_color(char c, Color color);
-void video_init(uint32_t addr);
+void init_video(uint32_t addr);
 Color rgb(int r, int g, int b);
 void kprint(char *string);
 void kprint_backspace();

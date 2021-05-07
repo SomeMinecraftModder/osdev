@@ -2,10 +2,12 @@
 #define KEYBOARD_H
 
 #define BACKSPACE 0x66
-#define CAPSLOCK 0x58
-#define LSHIFT 0x12
-#define ENTER 0x5A
-#define TAB 0x0D
+#define CAPSLOCK  0x58
+#define LSHIFT    0x12
+#define ENTER     0x5A
+#define TAB       0x0D
+
+#define TAB_SIZE 4
 
 #define SC_MAX 132
 

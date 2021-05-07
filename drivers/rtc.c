@@ -1,8 +1,8 @@
-#include "../drivers/screen.h"
-#include "../debug/printf.h"
+#include "rtc.h"
 #include "../cpu/ports.h"
 #include "../cpu/timer.h"
-#include "rtc.h"
+#include "../debug/printf.h"
+#include "../drivers/screen.h"
 
 int century_register = 0x00;
 
@@ -12,7 +12,8 @@ static int is_updating() {
 }
 
 static int read(int reg) {
-    while (is_updating());
+    while (is_updating())
+        ;
     port_byte_out(0x70, reg);
 
     return port_byte_in(0x71);
@@ -37,7 +38,7 @@ datetime_t rtc_get_date_time() {
     date_time.day = read(0x7);
     date_time.month = read(0x8);
     date_time.year = read(0x9);
- 
+
     if (century_register != 0) {
         date_time.century = read(century_register);
     }

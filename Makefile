@@ -20,8 +20,8 @@ release: LDFLAGS += -Os
 release: RELTYPE = Release
 release: os-image.iso
 
-reldebinfo: CFLAGS += -g -Os
-reldebinfo: LDFLAGS += -Os
+reldebinfo: CFLAGS += -g -Og
+reldebinfo: LDFLAGS += -Og
 reldebinfo: RELTYPE = RelWithDebInfo
 reldebinfo: os-image.iso
 

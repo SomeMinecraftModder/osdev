@@ -1,13 +1,13 @@
-#include "../drivers/screen.h"
-#include "../drivers/reboot.h"
-#include "../drivers/acpi.h"
-#include "../debug/printf.h"
-#include "../libc/string.h"
-#include "../drivers/rtc.h"
-#include "../cpu/detect.h"
-#include "../libc/mem.h"
-#include "panic.h"
 #include "shell.h"
+#include "../cpu/detect.h"
+#include "../debug/printf.h"
+#include "../drivers/acpi.h"
+#include "../drivers/reboot.h"
+#include "../drivers/rtc.h"
+#include "../drivers/screen.h"
+#include "../libc/kheap.h"
+#include "../libc/string.h"
+#include "panic.h"
 
 void shell(char *input) {
     int dis_print = 0;
@@ -17,8 +17,8 @@ void shell(char *input) {
         halt();
     } else if (strcmp(input, "page") == 0) {
         uint32_t phys_addr;
-        uint32_t page = kmalloc(1000, 1, &phys_addr);
-        kprintf("Page: %X, physical address: %X\n", page, phys_addr);
+        uint32_t page = kmalloc_ap(1000, &phys_addr);
+        kprintf("Page: %#X\n", page);
     } else if (strcmp(input, "clear") == 0) {
         clear_screen(black);
         dis_print = 1;
@@ -38,16 +38,16 @@ void shell(char *input) {
         kprint("\n");
     } else if (strcmp(input, "help") == 0) {
         kprint("Welcome to PawsOS, these are all the commands:\n"
-            "\"end\": to halt the CPU.\n"
-            "\"page\": to request a kmalloc().\n"
-            "\"clear\": to clear the screen.\n"
-            "\"cpuinfo\": to get information about your CPU.\n"
-            "\"rtc\" to get the current time (in UTC).\n"
-            "\"reboot\": to reboot your computer.\n"
-            "\"echo [argument]\": to print something on the screen.\n"
-            "\"shutdown\": to shutdown your computer.\n"
-            "Press Tab to enable AZERTY keyboard layout.\n"
-            "Press the Up key to print last used command.\n");
+               "\"end\": to halt the CPU.\n"
+               "\"page\": to request a kmalloc().\n"
+               "\"clear\": to clear the screen.\n"
+               "\"cpuinfo\": to get information about your CPU.\n"
+               "\"rtc\" to get the current time (in UTC).\n"
+               "\"reboot\": to reboot your computer.\n"
+               "\"echo [argument]\": to print something on the screen.\n"
+               "\"shutdown\": to shutdown your computer.\n"
+               "Press Left shift to enable AZERTY keyboard layout.\n"
+               "Press the Up key to print last used command.\n");
     }
 
     if (!dis_print) {

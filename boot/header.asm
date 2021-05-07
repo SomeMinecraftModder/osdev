@@ -1,6 +1,7 @@
-MALIGN   equ 1<<0
-MEMINFO  equ 1<<1
-VIDINFO  equ 1<<2
+[bits 32]
+MALIGN   equ 1 << 0
+MEMINFO  equ 1 << 1
+VIDINFO  equ 1 << 2
 FLAGS    equ MALIGN | MEMINFO | VIDINFO
 MAGIC    equ 0x1BADB002
 CHECKSUM equ -(MAGIC + FLAGS)

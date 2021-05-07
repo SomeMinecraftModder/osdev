@@ -1,3 +1,4 @@
+[bits 32]
 global gdt_descriptor
 global CODE_SEG
 global DATA_SEG
@@ -13,8 +14,8 @@ gdt_code: ; Entry 2: Code segment descriptor
     ; Segment Base Address (base) = 0x0
     ; Segment Limit (limit) = 0xfffff
     dw 0xFFFF ; Limit bits 0-15
-    dw 0x0000 ; Base bits 0-15
-    db 0x00 ; Base bits 16-23
+    dw 0x0 ; Base bits 0-15
+    db 0x0 ; Base bits 16-23
     ; Flag Set 1:
         ; Segment Present: 0b1
         ; Descriptor Privilege level: 0x00 (ring 0)
@@ -31,17 +32,17 @@ gdt_code: ; Entry 2: Code segment descriptor
         ; 64-bit segment: 0b0
         ; AVL: 0b0
     db 11001111B ; Flag set 3 and limit bits 16-19
-    db 0x00 ; Base bits 24-31
+    db 0x0 ; Base bits 24-31
 
 gdt_data:
     ; Same except for code flag:
     ; Code: 0b0
     dw 0xFFFF ; Limit bits 0-15
-    dw 0x0000 ; Base bits 0-15
-    db 0x00 ; Base bits 16-23
+    dw 0x0 ; Base bits 0-15
+    db 0x0 ; Base bits 16-23
     db 10010010B ; Flag set 1 and 2
     db 11001111B ; 2nd flags and limit bits 16-19
-    db 0x00 ; Base bits 24-31
+    db 0x0 ; Base bits 24-31
 
 gdt_end: ; Needed to calculate GDT size for inclusion in GDT descriptor
 
@@ -53,7 +54,3 @@ gdt_descriptor:
 ; Define constants
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
-
-; In protected mode, set DS = INDEX to select GDT entries
-; Then CPU knows to use segment at that offset
-; Example: (0x0: NULL segment; 0x8: CODE segment; 0x10: DATA segment)

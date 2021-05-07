@@ -1,11 +1,12 @@
+[bits 32]
 global stack_ptr
 global dis_ints
 global enb_ints
 global int_halt
 global halt
 
-extern kernel_main
 extern gdt_descriptor
+extern kernel_main
 extern CODE_SEG
 extern DATA_SEG 
 
@@ -16,7 +17,6 @@ resb 32768
 stack_top:
 
 section .text
-[bits 32]
 
 STACKSIZE equ 4 * 1024
 
@@ -56,12 +56,8 @@ _start:
 
 test_multiboot:
     cmp eax, 0x2BADB002
-    jne .no_multiboot
+    jne halt
     ret
-
-.no_multiboot:
-    mov al, "0"
-    jmp error
 
 test_cpuid:
     pushfd ; Store the FLAGS-register.
@@ -75,21 +71,8 @@ test_cpuid:
     push ecx ; Store the C-register.
     popfd ; Restore the FLAGS-register.
     xor eax, ecx ; Do a XOR-operation on the A-register and the C-register.
-    jz .no_cpuid ; The zero flag is set, no CPUID.
+    jz halt ; The zero flag is set, no CPUID.
     ret ; CPUID is available for use.
-
-.no_cpuid:
-    mov al, "1"
-    jmp error
-
-; Prints `ERR: ` and the given error code to screen and hangs.
-; parameter: error code (in ascii) in al
-error:
-    mov dword [0xB0000], 0x4F524F45
-    mov dword [0xB8004], 0x4F3A4F52
-    mov dword [0xB8008], 0x4F204F20
-    mov byte  [0xB800A], al
-    hlt
 
 enb_ints:
     sti
@@ -110,9 +93,5 @@ section .bss
 ebxb resw 1
 alignb 4
 stack:
-  resb STACKSIZE
+    resb STACKSIZE
 stack_ptr:
-
-section .kend
-global end_of_kernel
-end_of_kernel:
