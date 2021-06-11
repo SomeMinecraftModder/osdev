@@ -896,7 +896,7 @@ int vasprintf(char **buffer, const char *format, va_list va) {
     }
 
     *buffer = (char *)malloc(size + 1);
-    if (NULL == *buffer) {
+    if (*buffer == NULL) {
         return -1;
     }
 
