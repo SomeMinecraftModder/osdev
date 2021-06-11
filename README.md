@@ -16,7 +16,7 @@ A simple OS, which has various features:
 This OS is based on [cfenollosa/os-tutorial](https://github.com/cfenollosa/os-tutorial) and some other OSes with GPL compatible license.
 
 
-![jg6W8GIj](https://user-images.githubusercontent.com/62727185/116011187-595a8680-a5e9-11eb-8ae5-bf69024c8e22.gif)
+![HSrny1Ot](https://user-images.githubusercontent.com/62727185/121619214-da50ce80-ca2d-11eb-84ac-b67f67eeddb3.gif)
 
 ## Directory structure
 ```lang-none
