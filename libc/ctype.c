@@ -1,4 +1,4 @@
-#include "ctype.h"
+#include <ctype.h>
 
 int isblank(int c) {
     return c == '\t' || c == ' ';
@@ -53,6 +53,7 @@ int tolower(int c) {
     if (isupper(c)) {
         c = c + 'a' - 'A';
     }
+
     return c;
 }
 
@@ -60,5 +61,6 @@ int toupper(int c) {
     if (islower(c)) {
         c = c - 'a' + 'A';
     }
+
     return c;
 }

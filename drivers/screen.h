@@ -11,9 +11,11 @@ typedef struct {
 } Color;
 
 extern multiboot_info_t *mbi;
+extern Color bgcolor;
 extern Color white;
 extern Color green;
 extern Color black;
+extern Color blue;
 extern Color red;
 
 void kprint_at(char *string, int position_x, int position_y, Color color);

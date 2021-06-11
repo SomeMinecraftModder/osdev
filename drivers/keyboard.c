@@ -3,16 +3,17 @@
 #include "../cpu/ports.h"
 #include "../kernel/shell.h"
 #include "../libc/function.h"
-#include "../libc/string.h"
 #include "screen.h"
+#include <string.h>
 
-static char key_buffer[256];
-static char *history = " ";
 static int caps_lock = 0;
 static int azerty = 0;
+char key_buffer[256];
 uint8_t last_scancode;
+char history[256];
 uint8_t last_tab;
 uint8_t scancode;
+int enter = 0;
 int i;
 
 // Uppercase characters
@@ -88,7 +89,7 @@ static void keyboard_callback(registers_t *regs) {
         }
 
         if (scancode == 0x72) {
-            int i = strlen(key_buffer);
+            i = strlen(key_buffer);
             while (i > 0) {
                 kprint_backspace();
                 i--;
@@ -109,6 +110,7 @@ static void keyboard_callback(registers_t *regs) {
                     backspace(key_buffer);
                 }
                 last_tab = 0;
+                enter = 0;
                 break;
             }
 
@@ -116,6 +118,7 @@ static void keyboard_callback(registers_t *regs) {
                 kprint_backspace();
             }
             backspace(key_buffer);
+            enter = 0;
             break;
 
         case ENTER:
@@ -124,6 +127,7 @@ static void keyboard_callback(registers_t *regs) {
             strcpy(history, key_buffer);
             key_buffer[0] = '\0';
             last_tab = 0;
+            enter = 1;
             break;
 
         case CAPSLOCK:
@@ -133,44 +137,50 @@ static void keyboard_callback(registers_t *regs) {
             } else {
                 caps_lock = 1;
             }
+            enter = 0;
             break;
 
         case TAB:
-            kprint("\t");
-            int e = 0;
-            for (e = 0; e < TAB_SIZE; ++e) {
+            putchar('\t');
+            i = 0;
+            for (i = 0; i < TAB_SIZE; ++i) {
                 append(key_buffer, ' ');
             }
             last_tab = 1;
+            enter = 0;
             break;
 
         case LSHIFT:
             if (azerty == 0) {
                 azerty = 1;
-            } else {
+            } else if (azerty == 1) {
                 azerty = 0;
             }
+            enter = 0;
             break;
 
-        default:
+        default: {
             char letter;
-            if (azerty == 1) {
+            if (azerty) {
                 letter = sc_azerty[(int)scancode];
             } else {
                 letter = sc_ascii[(int)scancode];
             }
 
-            if (caps_lock == 0) {
-                if (azerty == 1) {
+            if (!caps_lock) {
+                if (azerty) {
                     letter = Lsc_azerty[(int)scancode];
                 } else {
                     letter = Lsc_ascii[(int)scancode];
                 }
             }
+
             append(key_buffer, letter);
             putchar(letter);
             last_tab = 0;
+            enter = 0;
             break;
+        }
     }
 
     UNUSED(regs);

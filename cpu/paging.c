@@ -1,9 +1,13 @@
 #include "paging.h"
 #include "../drivers/screen.h"
-#include "../drivers/serial.h"
 #include "../kernel/panic.h"
 #include "../libc/kheap.h"
-#include "../libc/string.h"
+#include <stdlib.h>
+#include <string.h>
+
+#ifdef __STRICT_ANSI__
+    #define asm __asm__
+#endif
 
 // The kernel's page directory
 page_directory_t *kernel_directory = 0;
@@ -56,6 +60,7 @@ static uint32_t first_frame() {
             }
         }
     }
+
     return -1;
 }
 
@@ -68,6 +73,7 @@ void alloc_frame(page_t *page, int is_kernel, int is_writeable) {
         if (idx == (uint32_t)-1) {
             PANIC(__FILE__, __LINE__, "No free frames.");
         }
+
         set_frame(idx * 0x1000);
         page->present = 1;
         page->rw = (is_writeable) ? 1 : 0;
@@ -89,13 +95,15 @@ void free_frame(page_t *page) {
 
 void init_paging() {
     nframes = mem_end_page / 0x1000;
-    frames = (uint32_t *)kmalloc(INDEX_FROM_BIT(nframes));
+    frames = (uint32_t *)malloc(INDEX_FROM_BIT(nframes));
     memset(frames, 0, INDEX_FROM_BIT(nframes));
 
     // Let's make a page directory
     kernel_directory = (page_directory_t *)kmalloc_a(sizeof(page_directory_t));
     memset(kernel_directory, 0, sizeof(page_directory_t));
     current_directory = kernel_directory;
+
+    identity_map_lfb(mbi->framebuffer_addr);
 
     /* Map some pages in the kernel heap area.
      * Here we call get_page but not alloc_frame. This causes page_table_t's
@@ -107,14 +115,12 @@ void init_paging() {
         get_page(i, 1, kernel_directory);
     }
 
-    identity_map_lfb(mbi->framebuffer_addr);
-
     /* We need to identity map (phys addr = virt addr) from
      * 0x0 to the end of used memory, so we can access this
      * transparently, as if paging wasn't enabled.
      * NOTE that we use a while loop here deliberately.
      * inside the loop body we actually change placement_address
-     * by calling kmalloc(). A while loop causes this to be
+     * by calling malloc(). A while loop causes this to be
      * computed on-the-fly rather than once at the start.
      * Allocate a lil' bit extra so the kernel heap can be
      * initialised properly */
@@ -143,11 +149,11 @@ void init_paging() {
 
 void identity_map_lfb(uint32_t location) {
     uint32_t j = location;
-    while (j < location + (mbi->framebuffer_width *
-                           (mbi->framebuffer_height + 11) * 4)) {
+    while (j < location +
+                 (mbi->framebuffer_pitch * (mbi->framebuffer_height + 16))) {
         // If frame is valid
         if (j + location +
-              (mbi->framebuffer_width * (mbi->framebuffer_height + 11) * 4) <
+              (mbi->framebuffer_pitch * (mbi->framebuffer_height + 16)) <
             mem_end_page) {
             set_frame(j); // Tell frame bitset this frame is in use
         }
@@ -211,15 +217,22 @@ void page_fault(registers_t *regs) {
     if (present) {
         strcat(pg, "present ");
     }
+
     if (rw) {
         strcat(pg, "read-only ");
     }
+
     if (us) {
         strcat(pg, "user-mode ");
     }
+
     if (reserved) {
         strcat(pg, "reserved ");
     }
-    PANIC(__FILE__, __LINE__, "%s), memory address: 0x%X.", pg,
-          faulting_address);
+    strcat(pg, "), memory address: ");
+    char c[256] = "";
+    alt_hex_to_ascii_upper(faulting_address, c);
+    strcat(pg, c);
+    strcat(pg, ".");
+    PANIC(__FILE__, __LINE__, pg);
 }

@@ -29,10 +29,10 @@ isr_common_stub:
     add esp, 8 ; Cleans up the pushed error code and pushed ISR number
     iret ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 
-; Common IRQ code. Identical to ISR code except for the 'call' 
+; Common IRQ code. Identical to ISR code except for the 'call'
 ; and the 'pop ebx'
 irq_common_stub:
-    pusha 
+    pusha
     mov ax, ds
     push eax
     mov ax, 0x10
@@ -51,8 +51,8 @@ irq_common_stub:
     mov gs, bx
     popa
     add esp, 8
-    iret 
-	
+    iret
+
 ; We don't get information about which interrupt was caller
 ; when the handler is run, so we will need to have a different handler
 ; for every interrupt.
@@ -170,7 +170,7 @@ isr9:
     push byte 9
     jmp isr_common_stub
 
-; 10: Bad TSS Exception (With Error Code!)
+; 10: Invalid TSS Exception (With Error Code!)
 isr10:
     push byte 10
     jmp isr_common_stub
@@ -219,13 +219,13 @@ isr18:
     push byte 18
     jmp isr_common_stub
 
-; 19: Reserved
+; 19: SIMD Exception
 isr19:
     push byte 0
     push byte 19
     jmp isr_common_stub
 
-; 20: Reserved
+; 20: Virtualization Exception
 isr20:
     push byte 0
     push byte 20
@@ -285,9 +285,8 @@ isr29:
     push byte 29
     jmp isr_common_stub
 
-; 30: Reserved
+; 30: Security Exception (With Error Code!)
 isr30:
-    push byte 0
     push byte 30
     jmp isr_common_stub
 
@@ -319,7 +318,7 @@ irq3:
     jmp irq_common_stub
 
 irq4:
-    push byte 4 
+    push byte 4
     push byte 36
     jmp irq_common_stub
 

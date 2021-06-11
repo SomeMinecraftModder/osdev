@@ -74,7 +74,7 @@ datetime_t rtc_get_date_time() {
 void rtctime() {
     datetime_t rtc_time = rtc_get_date_time();
 
-    kprintf("Year: %i\n", rtc_time.year);
+    printf("Year: %li\n", rtc_time.year);
 
     kprint("Month: ");
 
@@ -82,11 +82,11 @@ void rtctime() {
         kprint("0");
     }
 
-    kprintf("%i\n", rtc_time.month);
+    printf("%li\n", rtc_time.month);
 
-    kprintf("Day: %i\n", rtc_time.day);
+    printf("Day: %li\n", rtc_time.day);
 
-    kprintf("Hour: %i\n", rtc_time.time.hour);
+    printf("Hour: %li\n", rtc_time.time.hour);
 
     kprint("Minute: ");
 
@@ -94,7 +94,7 @@ void rtctime() {
         kprint("0");
     }
 
-    kprintf("%i\n", rtc_time.time.minute);
+    printf("%li\n", rtc_time.time.minute);
 
     kprint("Second: ");
 
@@ -102,21 +102,21 @@ void rtctime() {
         kprint("0");
     }
 
-    kprintf("%i\n", rtc_time.time.second);
+    printf("%li\n", rtc_time.time.second);
 
     kprint("Time since boot: ");
 
-    kprintf("%i:", hourboot);
+    printf("%li:", hourboot);
 
     if (minboot < 10) {
         kprint("0");
     }
 
-    kprintf("%i:", minboot);
+    printf("%li:", minboot);
 
     if (secboot < 10) {
         kprint("0");
     }
 
-    kprintf("%i\n", secboot);
+    printf("%li\n", secboot);
 }

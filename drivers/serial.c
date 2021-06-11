@@ -75,13 +75,6 @@ void write_serial_char(char word) {
     write_serial_port_char(COM1, word);
 }
 
-void printf_serial(char *s, ...) {
-    va_list ap;
-    va_start(ap, s);
-    vsprintf(NULL, write_serial_char, s, ap);
-    va_end(ap);
-}
-
 int serial_received(uint16_t PORT) {
     return port_byte_in(PORT + 5) & 1;
 }

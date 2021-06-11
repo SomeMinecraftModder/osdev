@@ -1,8 +1,10 @@
 #include "ports.h"
 
-/*
- * Read a byte from the specified port
- */
+#ifdef __STRICT_ANSI__
+    #define asm __asm__
+#endif
+
+// Read a byte from the specified port
 uint8_t port_byte_in(uint16_t port) {
     uint8_t result;
     /* Inline assembler syntax
@@ -24,7 +26,7 @@ uint16_t port_word_in(uint16_t port) {
     return result;
 }
 
-uint32_t port_data_in(uint16_t port) {
+uint32_t port_long_in(uint16_t port) {
     uint32_t result;
     asm("inl %%dx, %%eax" : "=a"(result) : "d"(port));
     return result;
@@ -43,7 +45,7 @@ void port_word_out(uint16_t port, uint16_t data) {
     asm volatile("outw %%ax, %%dx" : : "a"(data), "d"(port));
 }
 
-void port_data_out(uint16_t port, uint32_t data) {
+void port_long_out(uint16_t port, uint32_t data) {
     asm volatile("outl %%eax, %%dx" : : "a"(data), "d"(port));
 }
 

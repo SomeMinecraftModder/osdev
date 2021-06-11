@@ -1,26 +1,54 @@
-#include "string.h"
-#include "ctype.h"
-#include "kheap.h"
 #include "math.h"
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <signal.h>
+#include <stdlib.h>
+#define _GNU_SOURCE
+#include <string.h>
+#include <strings.h>
 
+#define ALIGN      (sizeof(size_t))
+#define ONES       ((size_t)-1 / UCHAR_MAX)
+#define HIGHS      (ONES * (UCHAR_MAX / 2 + 1))
+#define HASZERO(x) (((x)-ONES) & ~(x)&HIGHS)
 #define BITOP(a, b, op)                                \
     ((a)[(size_t)(b) / (8 * sizeof *(a))] op(size_t) 1 \
      << ((size_t)(b) % (8 * sizeof *(a))))
 
-/**
- * K&R implementation
- */
+int __errno = 0;
+
+static const struct errmsgstr_t {
+#define E(n, s) char str##n[sizeof(s)];
+#include "strerror.h"
+#undef E
+} errmsgstr = {
+#define E(n, s) s,
+#include "strerror.h"
+#undef E
+};
+
+static const uint16_t errmsgidx[] = {
+#define E(n, s) [n] = offsetof(struct errmsgstr_t, str##n),
+#include "strerror.h"
+#undef E
+};
+
 char *int_to_ascii(int n, char str[]) {
     int i, sign;
-    if ((sign = n) < 0)
+    if ((sign = n) < 0) {
         n = -n;
+    }
+
     i = 0;
     do {
         str[i++] = n % 10 + '0';
     } while ((n /= 10) > 0);
 
-    if (sign < 0)
+    if (sign < 0) {
         str[i++] = '-';
+    }
+
     str[i] = '\0';
 
     reverse(str);
@@ -132,97 +160,370 @@ char *octal_to_ascii(int n) {
     return (str);
 }
 
-int atoi(const char *str) {
-    int n = 0, neg = 0;
-    while (isspace(*str)) {
-        str++;
+void *memcpy(void *restrict dest, const void *restrict src, size_t n) {
+    uint8_t *d = dest;
+    const uint8_t *s = src;
+
+#ifdef __GNUC__
+    typedef uint32_t __attribute__((__may_alias__)) u32;
+    uint32_t w, x;
+
+    for (; (uintptr_t)s % 4 && n; n--) {
+        *d++ = *s++;
     }
 
-    switch (*str) {
-        case '-':
-            neg = 1;
-            break;
+    if ((uintptr_t)d % 4 == 0) {
+        for (; n >= 16; s += 16, d += 16, n -= 16) {
+            *(u32 *)(d + 0) = *(u32 *)(s + 0);
+            *(u32 *)(d + 4) = *(u32 *)(s + 4);
+            *(u32 *)(d + 8) = *(u32 *)(s + 8);
+            *(u32 *)(d + 12) = *(u32 *)(s + 12);
+        }
 
-        case '+':
-            str++;
-            break;
+        if (n & 8) {
+            *(u32 *)(d + 0) = *(u32 *)(s + 0);
+            *(u32 *)(d + 4) = *(u32 *)(s + 4);
+            d += 8;
+            s += 8;
+        }
+
+        if (n & 4) {
+            *(u32 *)(d + 0) = *(u32 *)(s + 0);
+            d += 4;
+            s += 4;
+        }
+
+        if (n & 2) {
+            *d++ = *s++;
+            *d++ = *s++;
+        }
+
+        if (n & 1) {
+            *d = *s;
+        }
+
+        return dest;
     }
 
-    while (isdigit(*str)) {
-        n = 10 * n - (*str++ - '0');
+    if (n >= 32)
+        switch ((uintptr_t)d % 4) {
+            case 1:
+                w = *(u32 *)s;
+                *d++ = *s++;
+                *d++ = *s++;
+                *d++ = *s++;
+                n -= 3;
+                for (; n >= 17; s += 16, d += 16, n -= 16) {
+                    x = *(u32 *)(s + 1);
+                    *(u32 *)(d + 0) = (w >> 24) | (x << 8);
+                    w = *(u32 *)(s + 5);
+                    *(u32 *)(d + 4) = (x >> 24) | (w << 8);
+                    x = *(u32 *)(s + 9);
+                    *(u32 *)(d + 8) = (w >> 24) | (x << 8);
+                    w = *(u32 *)(s + 13);
+                    *(u32 *)(d + 12) = (x >> 24) | (w << 8);
+                }
+                break;
+
+            case 2:
+                w = *(u32 *)s;
+                *d++ = *s++;
+                *d++ = *s++;
+                n -= 2;
+                for (; n >= 18; s += 16, d += 16, n -= 16) {
+                    x = *(u32 *)(s + 2);
+                    *(u32 *)(d + 0) = (w >> 16) | (x << 16);
+                    w = *(u32 *)(s + 6);
+                    *(u32 *)(d + 4) = (x >> 16) | (w << 16);
+                    x = *(u32 *)(s + 10);
+                    *(u32 *)(d + 8) = (w >> 16) | (x << 16);
+                    w = *(u32 *)(s + 14);
+                    *(u32 *)(d + 12) = (x >> 16) | (w << 16);
+                }
+                break;
+
+            case 3:
+                w = *(u32 *)s;
+                *d++ = *s++;
+                n -= 1;
+                for (; n >= 19; s += 16, d += 16, n -= 16) {
+                    x = *(u32 *)(s + 3);
+                    *(u32 *)(d + 0) = (w >> 8) | (x << 24);
+                    w = *(u32 *)(s + 7);
+                    *(u32 *)(d + 4) = (x >> 8) | (w << 24);
+                    x = *(u32 *)(s + 11);
+                    *(u32 *)(d + 8) = (w >> 8) | (x << 24);
+                    w = *(u32 *)(s + 15);
+                    *(u32 *)(d + 12) = (x >> 8) | (w << 24);
+                }
+                break;
+        }
+
+    if (n & 16) {
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
     }
 
-    return neg ? n : -n;
-}
+    if (n & 8) {
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+    }
 
-void *memcpy(void *dest, const void *src, size_t nbytes) {
-    uint8_t *q = (uint8_t *)dest;
-    uint8_t *p = (uint8_t *)src;
-    uint8_t *end = p + nbytes;
+    if (n & 4) {
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+        *d++ = *s++;
+    }
 
-    while (p != end) {
-        *q++ = *p++;
+    if (n & 2) {
+        *d++ = *s++;
+        *d++ = *s++;
+    }
+
+    if (n & 1) {
+        *d = *s;
     }
 
     return dest;
+#endif
+
+    for (; n; n--) {
+        *d++ = *s++;
+    }
+    return dest;
 }
+
+#define ALIGNM (sizeof(size_t) - 1)
 
 void *memccpy(void *restrict dest, const void *restrict src, int c, size_t n) {
     uint8_t *d = dest;
     const uint8_t *s = src;
 
     c = (uint8_t)c;
+#ifdef __GNUC__
+    typedef size_t __attribute__((__may_alias__)) word;
+    word *wd;
+    const word *ws;
+    if (((uintptr_t)s & ALIGNM) == ((uintptr_t)d & ALIGNM)) {
+        for (; ((uintptr_t)s & ALIGNM) && n && (*d = *s) != c; n--, s++, d++)
+            ;
+        if ((uintptr_t)s & ALIGNM) {
+            goto tail;
+        }
+
+        size_t k = ONES * c;
+        wd = (void *)d;
+        ws = (const void *)s;
+        for (; n >= sizeof(size_t) && !HASZERO(*ws ^ k);
+             n -= sizeof(size_t), ws++, wd++) {
+            *wd = *ws;
+        }
+
+        d = (void *)wd;
+        s = (const void *)ws;
+    }
+#endif
     for (; n && (*d = *s) != c; n--, s++, d++)
         ;
+tail:
     if (n) {
         return d + 1;
     }
     return 0;
 }
 
-void *mempcpy(void *dest, const void *src, size_t nbytes) {
-    return (char *)memcpy(dest, src, nbytes) + nbytes;
+void *mempcpy(void *dest, const void *src, size_t n) {
+    return (char *)memcpy(dest, src, n) + n;
 }
 
-void *memset(void *dest, uint8_t val, size_t len) {
-    uint8_t *temp = (uint8_t *)dest;
-    for (; len != 0; len--)
-        *temp++ = val;
+void *memset(void *dest, uint8_t c, size_t n) {
+    uint8_t *s = dest;
+    size_t k;
+
+    if (!n) {
+        return dest;
+    }
+
+    s[0] = c;
+    s[n - 1] = c;
+    if (n <= 2) {
+        return dest;
+    }
+
+    s[1] = c;
+    s[2] = c;
+    s[n - 2] = c;
+    s[n - 3] = c;
+    if (n <= 6) {
+        return dest;
+    }
+
+    s[3] = c;
+    s[n - 4] = c;
+    if (n <= 8) {
+        return dest;
+    }
+
+    k = -(uintptr_t)s & 3;
+    s += k;
+    n -= k;
+    n &= -4;
+
+#ifdef __GNUC__
+    typedef uint32_t __attribute__((__may_alias__)) u32;
+    typedef uint64_t __attribute__((__may_alias__)) u64;
+
+    u32 c32 = ((u32)-1) / 255 * (unsigned char)c;
+
+    *(u32 *)(s + 0) = c32;
+    *(u32 *)(s + n - 4) = c32;
+    if (n <= 8) {
+        return dest;
+    }
+
+    *(u32 *)(s + 4) = c32;
+    *(u32 *)(s + 8) = c32;
+    *(u32 *)(s + n - 12) = c32;
+    *(u32 *)(s + n - 8) = c32;
+    if (n <= 24) {
+        return dest;
+    }
+
+    *(u32 *)(s + 12) = c32;
+    *(u32 *)(s + 16) = c32;
+    *(u32 *)(s + 20) = c32;
+    *(u32 *)(s + 24) = c32;
+    *(u32 *)(s + n - 28) = c32;
+    *(u32 *)(s + n - 24) = c32;
+    *(u32 *)(s + n - 20) = c32;
+    *(u32 *)(s + n - 16) = c32;
+
+    k = 24 + ((uintptr_t)s & 4);
+    s += k;
+    n -= k;
+
+    u64 c64 = c32 | ((u64)c32 << 32);
+    for (; n >= 32; n -= 32, s += 32) {
+        *(u64 *)(s + 0) = c64;
+        *(u64 *)(s + 8) = c64;
+        *(u64 *)(s + 16) = c64;
+        *(u64 *)(s + 24) = c64;
+    }
+#else
+    // Pure C fallback with no aliasing violations
+    for (; n; n--, s++) {
+        *s = c;
+    }
+#endif
+
     return dest;
 }
 
-void *memmove(void *dest, const void *src, size_t nbytes) {
-    uint8_t *p = (uint8_t *)src;
-    uint8_t *q = (uint8_t *)dest;
-    uint8_t *end = p + nbytes;
+#ifdef __GNUC__
+typedef __attribute__((__may_alias__)) size_t WT;
+    #define WS (sizeof(WT))
+#endif
 
-    if (q > p && q < end) {
-        p = end;
-        q += nbytes;
+void *memmove(void *dest, const void *src, size_t n) {
+    char *d = dest;
+    const char *s = src;
 
-        while (p != src) {
-            *--q = *--p;
+    if (d == s) {
+        return d;
+    }
+
+    if ((uintptr_t)s - (uintptr_t)d - n <= -2 * n) {
+        return memcpy(d, s, n);
+    }
+
+    if (d < s) {
+#ifdef __GNUC__
+        if ((uintptr_t)s % WS == (uintptr_t)d % WS) {
+            while ((uintptr_t)d % WS) {
+                if (!n--) {
+                    return dest;
+                }
+
+                *d++ = *s++;
+            }
+
+            for (; n >= WS; n -= WS, d += WS, s += WS) {
+                *(WT *)d = *(WT *)s;
+            }
+        }
+#endif
+        for (; n; n--) {
+            *d++ = *s++;
         }
     } else {
-        while (p != end) {
-            *q++ = *p++;
+#ifdef __GNUC__
+        if ((uintptr_t)s % WS == (uintptr_t)d % WS) {
+            while ((uintptr_t)(d + n) % WS) {
+                if (!n--) {
+                    return dest;
+                }
+
+                d[n] = s[n];
+            }
+
+            while (n >= WS) {
+                n -= WS, *(WT *)(d + n) = *(WT *)(s + n);
+            }
+        }
+#endif
+        while (n) {
+            n--, d[n] = s[n];
         }
     }
 
     return dest;
 }
 
-void *memchr(const void *buf, int c, size_t n) {
-    const uint8_t *p = (uint8_t *)buf;
-    c = (uint8_t)c;
+#define SS (sizeof(size_t))
 
-    for (; n && *p != c; p++, n--)
+void *memchr(const void *src, int c, size_t n) {
+    const uint8_t *s = src;
+    c = (uint8_t)c;
+#ifdef __GNUC__
+    for (; ((uintptr_t)s & ALIGNM) && n && *s != c; s++, n--)
         ;
-    return n ? (void *)p : 0;
+    if (n && *s != c) {
+        typedef size_t __attribute__((__may_alias__)) word;
+        const word *w;
+        size_t k = ONES * c;
+        for (w = (const void *)s; n >= SS && !HASZERO(*w ^ k); w++, n -= SS)
+            ;
+        s = (const void *)w;
+    }
+#endif
+    for (; n && *s != c; s++, n--)
+        ;
+    return n ? (void *)s : 0;
 }
 
-void *memrchr(const void *buf, int c, size_t n) {
-    const uint8_t *s = buf;
+void *memrchr(const void *m, int c, size_t n) {
+    const uint8_t *s = m;
     c = (uint8_t)c;
     while (n--) {
         if (s[n] == c) {
@@ -233,19 +534,11 @@ void *memrchr(const void *buf, int c, size_t n) {
     return 0;
 }
 
-int memcmp(const void *s1, const void *s2, size_t n) {
-    uint8_t *byte1 = (uint8_t *)s1;
-    uint8_t *byte2 = (uint8_t *)s2;
-    while ((*byte1 == *byte2) && (n > 0)) {
-        ++byte1;
-        ++byte2;
-        --n;
-    }
-
-    if (n == 0) {
-        return 0;
-    }
-    return *byte1 - *byte2;
+int memcmp(const void *vl, const void *vr, size_t n) {
+    const uint8_t *l = vl, *r = vr;
+    for (; n && *l == *r; n--, l++, r++)
+        ;
+    return n ? *l - *r : 0;
 }
 
 int startswith(char *str, char *accept) {
@@ -292,8 +585,6 @@ void backspace(char s[]) {
     s[len - 1] = '\0';
 }
 
-/* K&R
- * Returns <0 if s1<s2, 0 if s1==s2, >0 if s1>s2 */
 int strcmp(const char s1[], const char s2[]) {
     int i;
 
@@ -318,13 +609,23 @@ int strncmp(const char s1[], const char s2[], size_t n) {
 }
 
 size_t strlen(const char *s) {
-    int i = 0;
-
-    while (s[i] != '\0') {
-        ++i;
+    const char *a = s;
+#ifdef __GNUC__
+    typedef size_t __attribute__((__may_alias__)) word;
+    const word *w;
+    for (; (uintptr_t)s % ALIGN; s++) {
+        if (!*s) {
+            return s - a;
+        }
     }
 
-    return i;
+    for (w = (const void *)s; !HASZERO(*w); w++)
+        ;
+    s = (const void *)w;
+#endif
+    for (; *s; s++)
+        ;
+    return s - a;
 }
 
 size_t strnlen(const char *s, int32_t n) {
@@ -351,12 +652,37 @@ finish:
     return d - d0 + strlen(s);
 }
 
+size_t strlcat(char *d, const char *s, size_t n) {
+    size_t l = strnlen(d, n);
+    if (l == n) {
+        return l + strlen(s);
+    }
+
+    return l + strlcpy(d + l, s, n - l);
+}
+
 char *strncpy(char *restrict dest, const char *restrict src, size_t n) {
     stpncpy(dest, src, n);
     return dest;
 }
 
 char *stpcpy(char *restrict d, const char *restrict s) {
+#ifdef __GNUC__
+    typedef size_t __attribute__((__may_alias__)) word;
+    word *wd;
+    const word *ws;
+    if ((uintptr_t)s % ALIGN == (uintptr_t)d % ALIGN) {
+        for (; (uintptr_t)s % ALIGN; s++, d++)
+            if (!(*d = *s))
+                return d;
+        wd = (void *)d;
+        ws = (const void *)s;
+        for (; !HASZERO(*ws); *wd++ = *ws++)
+            ;
+        d = (void *)wd;
+        s = (const void *)ws;
+    }
+#endif
     for (; (*d = *s); s++, d++)
         ;
 
@@ -364,8 +690,31 @@ char *stpcpy(char *restrict d, const char *restrict s) {
 }
 
 char *stpncpy(char *restrict d, const char *restrict s, size_t n) {
+#ifdef __GNUC__
+    typedef size_t __attribute__((__may_alias__)) word;
+    word *wd;
+    const word *ws;
+    if (((uintptr_t)s & ALIGNM) == ((uintptr_t)d & ALIGNM)) {
+        for (; ((uintptr_t)s & ALIGNM) && n && (*d = *s); n--, s++, d++)
+            ;
+        if (!n || !*s) {
+            goto tail;
+        }
+
+        wd = (void *)d;
+        ws = (const void *)s;
+        for (; n >= sizeof(size_t) && !HASZERO(*ws);
+             n -= sizeof(size_t), ws++, wd++) {
+            *wd = *ws;
+        }
+
+        d = (void *)wd;
+        s = (const void *)ws;
+    }
+#endif
     for (; n && (*d = *s); n--, s++, d++)
         ;
+tail:
     memset(d, 0, n);
     return d;
 }
@@ -490,13 +839,13 @@ static char *twoway_strstr(const uint8_t *h, const uint8_t *n) {
     // Search loop
     for (;;) {
         // Update incremental end-of-haystack pointer
-        if (z - h < (long signed int)l) {
+        if (z - h < (int32_t)l) {
             // Fast estimate for max(l, 63)
             size_t grow = l | 63;
             const uint8_t *z2 = memchr(z, 0, grow);
             if (z2) {
                 z = z2;
-                if (z - h < (long signed int)l)
+                if (z - h < (int32_t)l)
                     return 0;
             } else {
                 z += grow;
@@ -601,6 +950,19 @@ char *strchrnul(const char *s, int c) {
         return (char *)s + strlen(s);
     }
 
+#ifdef __GNUC__
+    typedef size_t __attribute__((__may_alias__)) word;
+    const word *w;
+    for (; (uintptr_t)s % ALIGN; s++) {
+        if (!*s || *(uint8_t *)s == c) {
+            return (char *)s;
+        }
+    }
+    size_t k = ONES * c;
+    for (w = (void *)s; !HASZERO(*w) && !HASZERO(*w ^ k); w++)
+        ;
+    s = (void *)w;
+#endif
     for (; *s && *(uint8_t *)s != c; s++)
         ;
     return (char *)s;
@@ -673,6 +1035,26 @@ char *strtok(char *restrict s, const char *restrict sep) {
     return s;
 }
 
+char *strtok_r(char *restrict s, const char *restrict sep, char **restrict p) {
+    if (!s && !(s = *p)) {
+        return NULL;
+    }
+
+    s += strspn(s, sep);
+    if (!*s) {
+        return *p = 0;
+    }
+
+    *p = s + strcspn(s, sep);
+    if (**p) {
+        *(*p)++ = 0;
+    } else {
+        *p = 0;
+    }
+
+    return s;
+}
+
 char *strpbrk(const char *s, const char *b) {
     s += strcspn(s, b);
     return *s ? (char *)s : 0;
@@ -687,24 +1069,27 @@ size_t strxfrm(char *restrict dest, const char *restrict src, size_t n) {
     if (n > l) {
         strcpy(dest, src);
     }
+
     return l;
 }
 
 char *strdup(const char *s) {
     size_t l = strlen(s);
-    char *d = (char *)kmalloc(l + 1);
+    char *d = (char *)malloc(l + 1);
     if (!d) {
         return NULL;
     }
+
     return memcpy(d, s, l + 1);
 }
 
 char *strndup(const char *s, size_t n) {
     size_t l = strnlen(s, n);
-    char *d = (char *)kmalloc(l + 1);
+    char *d = (char *)malloc(l + 1);
     if (!d) {
         return NULL;
     }
+
     memcpy(d, s, l);
     d[l] = 0;
     return d;
@@ -716,6 +1101,7 @@ char *strsep(char **str, const char *sep) {
     if (!s) {
         return NULL;
     }
+
     end = s + strcspn(s, sep);
     if (*end) {
         *end++ = 0;
@@ -727,13 +1113,199 @@ char *strsep(char **str, const char *sep) {
     return s;
 }
 
+char *strerror(int e) {
+    const char *s;
+    if ((uint32_t)e >= sizeof(errmsgidx) / sizeof(*errmsgidx)) {
+        e = 0;
+    }
+
+    s = (char *)&errmsgstr + errmsgidx[e];
+    return (char *)s;
+}
+
+int strerror_r(int err, char *buf, size_t buflen) {
+    char *msg = strerror(err);
+    size_t l = strlen(msg);
+    if (l >= buflen) {
+        if (buflen) {
+            memcpy(buf, msg, buflen - 1);
+            buf[buflen - 1] = 0;
+        }
+        return ERANGE;
+    }
+
+    memcpy(buf, msg, l + 1);
+    return 0;
+}
+
+#if (SIGHUP == 1) && (SIGINT == 2) && (SIGQUIT == 3) && (SIGILL == 4) &&       \
+  (SIGTRAP == 5) && (SIGABRT == 6) && (SIGBUS == 7) && (SIGFPE == 8) &&        \
+  (SIGKILL == 9) && (SIGUSR1 == 10) && (SIGSEGV == 11) && (SIGUSR2 == 12) &&   \
+  (SIGPIPE == 13) && (SIGALRM == 14) && (SIGTERM == 15) &&                     \
+  (SIGSTKFLT == 16) && (SIGCHLD == 17) && (SIGCONT == 18) &&                   \
+  (SIGSTOP == 19) && (SIGTSTP == 20) && (SIGTTIN == 21) && (SIGTTOU == 22) &&  \
+  (SIGURG == 23) && (SIGXCPU == 24) && (SIGXFSZ == 25) && (SIGVTALRM == 26) && \
+  (SIGPROF == 27) && (SIGWINCH == 28) && (SIGPOLL == 29) && (SIGPWR == 30) &&  \
+  (SIGSYS == 31)
+
+    #define sigmap(x) x
+
+#else
+
+static const char map[] = {
+  [SIGHUP] = 1,     [SIGINT] = 2,     [SIGQUIT] = 3,  [SIGILL] = 4,
+  [SIGTRAP] = 5,    [SIGABRT] = 6,    [SIGBUS] = 7,   [SIGFPE] = 8,
+  [SIGKILL] = 9,    [SIGUSR1] = 10,   [SIGSEGV] = 11, [SIGUSR2] = 12,
+  [SIGPIPE] = 13,   [SIGALRM] = 14,   [SIGTERM] = 15,
+    #if defined(SIGSTKFLT)
+  [SIGSTKFLT] = 16,
+    #elif defined(SIGEMT)
+  [SIGEMT] = 16,
+    #endif
+  [SIGCHLD] = 17,   [SIGCONT] = 18,   [SIGSTOP] = 19, [SIGTSTP] = 20,
+  [SIGTTIN] = 21,   [SIGTTOU] = 22,   [SIGURG] = 23,  [SIGXCPU] = 24,
+  [SIGXFSZ] = 25,   [SIGVTALRM] = 26, [SIGPROF] = 27, [SIGWINCH] = 28,
+  [SIGPOLL] = 29,   [SIGPWR] = 30,    [SIGSYS] = 31};
+
+    #define sigmap(x) ((x) >= sizeof map ? (x) : map[(x)])
+
+#endif
+
+static const char strings[] =
+  "Unknown signal\0"
+  "Hangup\0"
+  "Interrupt\0"
+  "Quit\0"
+  "Illegal instruction\0"
+  "Trace/breakpoint trap\0"
+  "Aborted\0"
+  "Bus error\0"
+  "Arithmetic exception\0"
+  "Killed\0"
+  "User defined signal 1\0"
+  "Segmentation fault\0"
+  "User defined signal 2\0"
+  "Broken pipe\0"
+  "Alarm clock\0"
+  "Terminated\0"
+#if defined(SIGSTKFLT)
+  "Stack fault\0"
+#elif defined(SIGEMT)
+  "Emulator trap\0"
+#else
+  "Unknown signal\0"
+#endif
+  "Child process status\0"
+  "Continued\0"
+  "Stopped (signal)\0"
+  "Stopped\0"
+  "Stopped (tty input)\0"
+  "Stopped (tty output)\0"
+  "Urgent I/O condition\0"
+  "CPU time limit exceeded\0"
+  "File size limit exceeded\0"
+  "Virtual timer expired\0"
+  "Profiling timer expired\0"
+  "Window changed\0"
+  "I/O possible\0"
+  "Power failure\0"
+  "Bad system call\0"
+  "RT32"
+  "\0RT33\0RT34\0RT35\0RT36\0RT37\0RT38\0RT39\0RT40"
+  "\0RT41\0RT42\0RT43\0RT44\0RT45\0RT46\0RT47\0RT48"
+  "\0RT49\0RT50\0RT51\0RT52\0RT53\0RT54\0RT55\0RT56"
+  "\0RT57\0RT58\0RT59\0RT60\0RT61\0RT62\0RT63\0RT64"
+#if _NSIG > 65
+  "\0RT65\0RT66\0RT67\0RT68\0RT69\0RT70\0RT71\0RT72"
+  "\0RT73\0RT74\0RT75\0RT76\0RT77\0RT78\0RT79\0RT80"
+  "\0RT81\0RT82\0RT83\0RT84\0RT85\0RT86\0RT87\0RT88"
+  "\0RT89\0RT90\0RT91\0RT92\0RT93\0RT94\0RT95\0RT96"
+  "\0RT97\0RT98\0RT99\0RT100\0RT101\0RT102\0RT103\0RT104"
+  "\0RT105\0RT106\0RT107\0RT108\0RT109\0RT110\0RT111\0RT112"
+  "\0RT113\0RT114\0RT115\0RT116\0RT117\0RT118\0RT119\0RT120"
+  "\0RT121\0RT122\0RT123\0RT124\0RT125\0RT126\0RT127\0RT128"
+#endif
+  "";
+
+char *strsignal(int signum) {
+    const char *s = strings;
+
+    signum = sigmap(signum);
+    if (signum - 1U >= _NSIG - 1) {
+        signum = 0;
+    }
+
+    for (; signum--; s++) {
+        for (; *s; s++)
+            ;
+    }
+
+    return (char *)s;
+}
+
+int strverscmp(const char *l0, const char *r0) {
+    const uint8_t *l = (const void *)l0;
+    const uint8_t *r = (const void *)r0;
+    size_t i, dp, j;
+    int z = 1;
+
+    for (dp = i = 0; l[i] == r[i]; i++) {
+        int c = l[i];
+        if (!c) {
+            return 0;
+        }
+
+        if (!isdigit(c)) {
+            dp = i + 1;
+            z = 1;
+        } else if (c != '0') {
+            z = 0;
+        }
+    }
+
+    if (l[dp] != '0' && r[dp] != '0') {
+        for (j = i; isdigit(l[j]); j++) {
+            if (!isdigit(r[j])) {
+                return 1;
+            }
+        }
+
+        if (isdigit(r[j])) {
+            return -1;
+        }
+    } else if (z && dp < i && (isdigit(l[i]) || isdigit(r[i]))) {
+        return (uint8_t)(l[i] - '0') - (uint8_t)(r[i] - '0');
+    }
+
+    return l[i] - r[i];
+}
+
+char *strcasestr(const char *h, const char *n) {
+    size_t l = strlen(n);
+    for (; *h; h++) {
+        if (!strncasecmp(h, n, l)) {
+            return (char *)h;
+        }
+    }
+
+    return 0;
+}
+
 char *strtruncate(char *str, int n) {
-    if (n <= 0)
+    if (n <= 0) {
         return str;
+    }
+
     int l = n;
     int len = strlen(str);
-    if (n > len)
+    if (n > len) {
         l = len;
+    }
+
     str[len - l] = '\0';
     return str;
+}
+
+int *__errno_location() {
+    return &__errno;
 }

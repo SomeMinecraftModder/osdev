@@ -1,10 +1,11 @@
 #include "kheap.h"
 #include "../cpu/paging.h"
-#include "assert.h"
 #include "math.h"
-#include "string.h"
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
-// End is defined in the linker script.
+// "end" is defined in the linker script
 extern uint32_t end;
 extern page_directory_t *kernel_directory;
 uint32_t placement_address = (uint32_t)&end;
@@ -33,10 +34,6 @@ uint32_t kmalloc_int(size_t size, int align, uint32_t *phys) {
     }
 }
 
-void kfree(void *p) {
-    free(p, kheap);
-}
-
 void *kmalloc_a(size_t size) {
     return (void *)kmalloc_int(size, 1, 0);
 }
@@ -47,37 +44,6 @@ uint32_t kmalloc_p(size_t size, uint32_t *phys) {
 
 uint32_t kmalloc_ap(size_t size, uint32_t *phys) {
     return kmalloc_int(size, 1, phys);
-}
-
-void *kmalloc(size_t size) {
-    return (void *)kmalloc_int(size, 0, 0);
-}
-
-void *kcalloc(size_t num, size_t size) {
-    void *ptr = kmalloc(num * size);
-    memset(ptr, 0, num * size);
-    return ptr;
-}
-
-void *krealloc(void *ptr, size_t size) {
-    void *new_block;
-    size_t old_size;
-
-    new_block = kmalloc(size);
-    if (new_block == NULL) {
-        return NULL;
-    }
-
-    if (ptr == NULL) {
-        old_size = 0;
-    } else {
-        header_t *header = (header_t *)((uint32_t)ptr - sizeof(header_t));
-        old_size = header->size - sizeof(header_t) - sizeof(footer_t);
-    }
-
-    memcpy(new_block, ptr, min(old_size, size));
-    kfree(ptr);
-    return new_block;
 }
 
 static void expand(uint32_t new_size, heap_t *heap) {
@@ -117,8 +83,9 @@ static uint32_t contract(uint32_t new_size, heap_t *heap) {
     }
 
     // Don't contract too far!
-    if (new_size < HEAP_MIN_SIZE)
+    if (new_size < HEAP_MIN_SIZE) {
         new_size = HEAP_MIN_SIZE;
+    }
 
     uint32_t old_size = heap->end_address - heap->start_address;
     uint32_t i = old_size - 0x1000;
@@ -171,7 +138,7 @@ static int8_t header_t_less_than(void *a, void *b) {
 
 heap_t *create_heap(uint32_t start, uint32_t end_addr, uint32_t max,
                     uint8_t supervisor, uint8_t readonly) {
-    heap_t *heap = (heap_t *)kmalloc(sizeof(heap_t));
+    heap_t *heap = (heap_t *)malloc(sizeof(heap_t));
 
     // All our assumptions are made on startAddress and endAddress being
     // page-aligned
@@ -334,7 +301,7 @@ void *alloc(uint32_t size, uint8_t page_align, heap_t *heap) {
     return (void *)((uint32_t)block_header + sizeof(header_t));
 }
 
-void free(void *p, heap_t *heap) {
+void kfree(void *p, heap_t *heap) {
     // Exit gracefully for null pointers
     if (p == 0) {
         return;
@@ -359,13 +326,13 @@ void free(void *p, heap_t *heap) {
     // If the thing immediately to the left of us is a footer...
     footer_t *test_footer = (footer_t *)((uint32_t)header - sizeof(footer_t));
     if (test_footer->magic == HEAP_MAGIC && test_footer->header->is_hole == 1) {
-        uint32_t cache_size = header->size; // Cache our current size.
-        header = test_footer->header; // Rewrite our header with the new one.
+        uint32_t cache_size = header->size; // Cache our current size
+        header = test_footer->header; // Rewrite our header with the new one
         footer->header =
-          header; // Rewrite our footer to point to the new header.
-        header->size += cache_size; // Change the size.
+          header; // Rewrite our footer to point to the new header
+        header->size += cache_size; // Change the size
         do_add = 0; // Since this header is already in the index, we don't want
-                    // to add it again.
+                    // to add it again
     }
 
     // Unify right

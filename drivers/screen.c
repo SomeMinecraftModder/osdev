@@ -1,22 +1,30 @@
 #include "screen.h"
-#include "../libc/string.h"
+#include <string.h>
 
 multiboot_info_t *mbi;
 
-extern PSF fb_font;
-
 Color white = {255, 255, 255};
 Color green = {0, 255, 0};
+Color blue = {0, 0, 255};
 Color red = {168, 0, 0};
 Color black = {1, 1, 1};
 
+// Default color, can be changed by "clear_screen", used as text background and
+// color for screen scroll
+Color bgcolor = {1, 1, 1};
+
 int cursor_x = 0, cursor_y = 0;
 uint32_t *fb;
+PSF *fb_font;
+
+// Font is Terminus.
+extern char _binary_font_psf_start;
 
 void init_video(uint32_t addr) {
     mbi = (multiboot_info_t *)addr;
     fb = (uint32_t *)(uintptr_t)mbi->framebuffer_addr;
-    clear_screen(black);
+    fb_font = (PSF *)&_binary_font_psf_start;
+    clear_screen(bgcolor);
 }
 
 Color rgb(int r, int g, int b) {
@@ -49,36 +57,41 @@ void putchar_at(char c, int position_x, int position_y, Color color) {
             cursor_x += 4;
             return;
 
+        case '\v':
+            cursor_y++;
+            cursor_x++;
+            return;
+
         case '\b':
             cursor_x--;
             return;
     }
 
-    uint8_t *glyph = &fb_font.data[c * fb_font.glyph_size];
+    uint8_t *glyph = &fb_font->data[c * fb_font->glyph_size];
 
-    if ((cursor_y * fb_font.height) >= mbi->framebuffer_height) {
+    if ((cursor_y * fb_font->height) >= mbi->framebuffer_height) {
         kprint_newline();
         putchar_at(c, cursor_x, cursor_y, color);
         cursor_x--;
     }
 
-    size_t x = position_x * fb_font.width, y = position_y * fb_font.height;
+    size_t x = position_x * fb_font->width, y = position_y * fb_font->height;
 
     static const uint8_t masks[8] = {128, 64, 32, 16, 8, 4, 2, 1};
 
     size_t i, j;
-    for (i = 0; i < fb_font.height; i++) {
-        for (j = 0; j < fb_font.width; j++) {
+    for (i = 0; i < fb_font->height; i++) {
+        for (j = 0; j < fb_font->width; j++) {
             if (glyph[i] & masks[j]) {
                 draw_pixel(x + j, y + i, get_color(&color));
             } else {
-                draw_pixel(x + j, y + i, get_color(&black));
+                draw_pixel(x + j, y + i, get_color(&bgcolor));
             }
         }
     }
 
-    if (((cursor_x * fb_font.width) + (2 * fb_font.width)) >=
-        mbi->framebuffer_width - (2 * fb_font.width)) {
+    if (((cursor_x * fb_font->width) + (fb_font->width)) >=
+        mbi->framebuffer_width - (fb_font->width * 2)) {
         cursor_y++;
         cursor_x = 0;
     }
@@ -91,18 +104,18 @@ void putchar_at(char c, int position_x, int position_y, Color color) {
 void kprint_backspace() {
     if (cursor_x <= 1) {
         cursor_y--;
-        /* 131 - 1 (See down) = 130
+        /* 132 - 1 (See down) = 131
          * NOTE: This may broke when using other fonts */
-        cursor_x = 131;
+        cursor_x = 132;
     }
 
-    size_t x = (cursor_x * fb_font.width) - fb_font.width,
-           y = cursor_y * fb_font.height;
+    size_t x = (cursor_x * fb_font->width) - fb_font->width,
+           y = cursor_y * fb_font->height;
 
     size_t i, j;
-    for (i = 0; i < fb_font.height; i++) {
-        for (j = 0; j < fb_font.width; j++) {
-            draw_pixel(x + j, y + i, get_color(&black));
+    for (i = 0; i < fb_font->height; i++) {
+        for (j = 0; j < fb_font->width; j++) {
+            draw_pixel(x + j, y + i, get_color(&bgcolor));
         }
     }
 
@@ -110,9 +123,9 @@ void kprint_backspace() {
 }
 
 void kprint_newline() {
-    for (uint32_t y = fb_font.height; y != mbi->framebuffer_height; ++y) {
+    for (uint32_t y = fb_font->height; y != mbi->framebuffer_height; ++y) {
         void *dest = (void *)(((uintptr_t)fb) +
-                              (y - fb_font.height) * mbi->framebuffer_pitch);
+                              (y - fb_font->height) * mbi->framebuffer_pitch);
         const void *src =
           (void *)(((uintptr_t)fb) + y * mbi->framebuffer_pitch);
         memcpy(dest, src, mbi->framebuffer_width * 4);
@@ -120,19 +133,19 @@ void kprint_newline() {
 
     cursor_y--;
 
-    cursor_x = 131;
-    size_t x = (cursor_x * fb_font.width) - fb_font.width,
-           y = cursor_y * fb_font.height;
+    cursor_x = 132;
+    size_t x = (cursor_x * fb_font->width) - fb_font->width,
+           y = cursor_y * fb_font->height;
 
     size_t i, j;
-    while (x >= (2 * fb_font.width)) {
-        for (i = 0; i < fb_font.height; i++) {
-            for (j = 0; j < fb_font.width; j++) {
-                draw_pixel(x + j, y + i, get_color(&black));
+    while (x >= (2 * fb_font->width)) {
+        for (i = 0; i < fb_font->height; i++) {
+            for (j = 0; j < fb_font->width; j++) {
+                draw_pixel(x + j, y + i, get_color(&bgcolor));
             }
         }
-        x = (cursor_x * fb_font.width) - fb_font.width,
-        y = cursor_y * fb_font.height;
+        x = (cursor_x * fb_font->width) - fb_font->width,
+        y = cursor_y * fb_font->height;
         cursor_x--;
     }
 }
@@ -175,6 +188,8 @@ void clear_screen(Color color) {
             draw_pixel(x, y, get_color(&color));
         }
     }
+
+    bgcolor = color;
 }
 
 void kprint_gok() {

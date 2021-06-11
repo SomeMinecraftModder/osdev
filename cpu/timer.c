@@ -1,8 +1,13 @@
 #include "timer.h"
 #include "../libc/function.h"
-#include "../libc/string.h"
 #include "isr.h"
 #include "ports.h"
+#include <stdlib.h>
+#include <string.h>
+
+#ifdef __STRICT_ANSI__
+    #define asm __asm__
+#endif
 
 uint32_t secboot = 0;
 uint32_t minboot = 0;

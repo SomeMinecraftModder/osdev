@@ -3,8 +3,8 @@
 #include "../cpu/timer.h"
 #include "../drivers/screen.h"
 #include "../kernel/panic.h"
-#include "../libc/string.h"
 #include <stddef.h>
+#include <string.h>
 
 uint32_t *SMI_CMD;
 uint8_t ACPI_ENABLE;
@@ -15,38 +15,108 @@ uint16_t SLP_TYPa;
 uint16_t SLP_TYPb;
 uint16_t SLP_EN;
 uint16_t SCI_EN;
-uint8_t PM1_CNT_LEN;
 
 struct RSDPtr {
-    uint8_t Signature[8];
-    uint8_t CheckSum;
-    uint8_t OemID[6];
+    char Signature[8];
+    uint8_t Checksum;
+    char OEMID[6];
     uint8_t Revision;
-    uint32_t *RsdtAddress;
+    uint32_t RsdtAddress;
+} __attribute__((packed));
+
+struct ACPISDTHeader {
+    char Signature[4];
+    uint32_t Length;
+    uint8_t Revision;
+    uint8_t Checksum;
+    char OEMID[6];
+    char OEMTableID[8];
+    uint32_t OEMRevision;
+    uint32_t CreatorID;
+    uint32_t CreatorRevision;
 };
 
+struct GenericAddressStructure {
+    uint8_t AddressSpace;
+    uint8_t BitWidth;
+    uint8_t BitOffset;
+    uint8_t AccessSize;
+    uint64_t Address;
+};
+
+// The FADT is a complex structure and contains a lot of data
+// Source (for the above comment and this table): OSDev wiki
 struct FACP {
-    uint8_t Signature[4];
-    uint32_t Length;
-    uint8_t unneded1[40 - 8];
-    uint32_t *DSDT;
-    uint8_t unneded2[48 - 44];
-    uint32_t *SMI_CMD;
-    uint8_t ACPI_ENABLE;
-    uint8_t ACPI_DISABLE;
-    uint8_t unneded3[64 - 54];
-    uint32_t *PM1a_CNT_BLK;
-    uint32_t *PM1b_CNT_BLK;
-    uint8_t unneded4[89 - 72];
-    uint8_t PM1_CNT_LEN;
+    struct ACPISDTHeader h;
+    uint32_t FirmwareCtrl;
+    uint32_t Dsdt;
+
+    // Field used in ACPI 1.0; no longer in use, for compatibility only
+    uint8_t Reserved;
+
+    uint8_t PreferredPowerManagementProfile;
+    uint16_t SCI_Interrupt;
+    uint32_t SMI_CommandPort;
+    uint8_t AcpiEnable;
+    uint8_t AcpiDisable;
+    uint8_t S4BIOS_REQ;
+    uint8_t PSTATE_Control;
+    uint32_t PM1aEventBlock;
+    uint32_t PM1bEventBlock;
+    uint32_t PM1aControlBlock;
+    uint32_t PM1bControlBlock;
+    uint32_t PM2ControlBlock;
+    uint32_t PMTimerBlock;
+    uint32_t GPE0Block;
+    uint32_t GPE1Block;
+    uint8_t PM1EventLength;
+    uint8_t PM1ControlLength;
+    uint8_t PM2ControlLength;
+    uint8_t PMTimerLength;
+    uint8_t GPE0Length;
+    uint8_t GPE1Length;
+    uint8_t GPE1Base;
+    uint8_t CStateControl;
+    uint16_t WorstC2Latency;
+    uint16_t WorstC3Latency;
+    uint16_t FlushSize;
+    uint16_t FlushStride;
+    uint8_t DutyOffset;
+    uint8_t DutyWidth;
+    uint8_t DayAlarm;
+    uint8_t MonthAlarm;
+    uint8_t Century;
+
+    // Reserved in ACPI 1.0; used since ACPI 2.0+
+    uint16_t BootArchitectureFlags;
+
+    uint8_t Reserved2;
+    uint32_t Flags;
+
+    struct GenericAddressStructure ResetReg;
+
+    uint8_t ResetValue;
+    uint8_t Reserved3[3];
+
+    // 64bit pointers - Available on ACPI 2.0+
+    uint64_t X_FirmwareControl;
+    uint64_t X_Dsdt;
+
+    struct GenericAddressStructure X_PM1aEventBlock;
+    struct GenericAddressStructure X_PM1bEventBlock;
+    struct GenericAddressStructure X_PM1aControlBlock;
+    struct GenericAddressStructure X_PM1bControlBlock;
+    struct GenericAddressStructure X_PM2ControlBlock;
+    struct GenericAddressStructure X_PMTimerBlock;
+    struct GenericAddressStructure X_GPE0Block;
+    struct GenericAddressStructure X_GPE1Block;
 };
 
 // Check if the given address has a valid header
 uint32_t *acpi_check_rsdp_tr(uint32_t *ptr) {
-    char *sig = "RSD PTR ";
     struct RSDPtr *rsdp = (struct RSDPtr *)ptr;
 
-    if (memcmp(sig, rsdp, 8) == 0) {
+    if (memcmp("RSD PTR ", rsdp, 8) == 0) {
         uint8_t *bptr;
         uint8_t check = 0;
         uint32_t i;
@@ -107,10 +177,12 @@ int acpi_check_header(uint32_t *ptr, char *sig) {
             check += *checkPtr;
             checkPtr++;
         }
+
         if (check == 0) {
             return 0;
         }
     }
+
     return -1;
 }
 
@@ -127,16 +199,20 @@ int acpi_enable() {
                 if ((port_word_in((uint32_t)PM1a_CNT) & SCI_EN) == 1) {
                     break;
                 }
+
                 sleep(10);
             }
+
             if (PM1b_CNT != 0) {
                 for (; i < 300; i++) {
                     if ((port_word_in((uint32_t)PM1b_CNT) & SCI_EN) == 1) {
                         break;
                     }
+
                     sleep(10);
                 }
             }
+
             if (i < 300) {
                 kprint_gok();
                 kprint("Enabling ACPI.\n");
@@ -165,6 +241,7 @@ int acpi_init() {
     if (ptr != NULL && acpi_check_header(ptr, "RSDT") == 0) {
         // The RSDT contains an unknown number of pointers to ACPI tables
         int entrys = *(ptr + 1);
+
         entrys = (entrys - 36) / 4;
         ptr += 36 / 4; // Skip header information
 
@@ -173,16 +250,17 @@ int acpi_init() {
             if (acpi_check_header((uint32_t *)*ptr, "FACP") == 0) {
                 entrys = -2;
                 struct FACP *facp = (struct FACP *)*ptr;
-                if (acpi_check_header((uint32_t *)facp->DSDT, "DSDT") == 0) {
+                if (acpi_check_header((uint32_t *)facp->Dsdt, "DSDT") == 0) {
                     // Search the \_S5 package in the DSDT
-                    char *S5Addr = (char *)facp->DSDT + 36; // Skip header
-                    int dsdtLength = *(facp->DSDT + 1) - 36;
+                    char *S5Addr = (char *)facp->Dsdt + 36; // Skip header
+                    int dsdtLength = (facp->Dsdt + 1) - 36;
                     while (0 < dsdtLength--) {
                         if (memcmp(S5Addr, "_S5_", 4) == 0) {
                             break;
                         }
                         S5Addr++;
                     }
+
                     // Check if \_S5 was found
                     if (dsdtLength > 0) {
                         // Check for valid AML structure
@@ -197,23 +275,23 @@ int acpi_init() {
                             if (*S5Addr == 0x0A) {
                                 S5Addr++; // Skip byteprefix
                             }
+
                             SLP_TYPa = *(S5Addr) << 10;
                             S5Addr++;
 
                             if (*S5Addr == 0x0A) {
                                 S5Addr++; // Skip byteprefix
                             }
+
                             SLP_TYPb = *(S5Addr) << 10;
 
-                            SMI_CMD = facp->SMI_CMD;
+                            SMI_CMD = (uint32_t *)facp->SMI_CommandPort;
 
-                            ACPI_ENABLE = facp->ACPI_ENABLE;
-                            ACPI_DISABLE = facp->ACPI_DISABLE;
+                            ACPI_ENABLE = facp->AcpiEnable;
+                            ACPI_DISABLE = facp->AcpiDisable;
 
-                            PM1a_CNT = facp->PM1a_CNT_BLK;
-                            PM1b_CNT = facp->PM1b_CNT_BLK;
-
-                            PM1_CNT_LEN = facp->PM1_CNT_LEN;
+                            PM1a_CNT = (uint32_t *)facp->PM1aControlBlock;
+                            PM1b_CNT = (uint32_t *)facp->PM1bControlBlock;
 
                             SLP_EN = 1 << 13;
                             SCI_EN = 1;

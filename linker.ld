@@ -30,9 +30,7 @@ SECTIONS {
 		ebss = .;
 	}
 
-	/*
-	 * Get rid of unnecessary GCC bits.
-	 */
+	/* Get rid of unnecessary GCC bits */
 	/DISCARD/ : {
 		*(.comment)
 		*(.eh_frame)

@@ -3,6 +3,10 @@
 #include "../drivers/screen.h"
 #include <stdint.h>
 
+#ifdef __STRICT_ANSI__
+    #define asm __asm__
+#endif
+
 static inline void cpuid(uint32_t reg, uint32_t *eax, uint32_t *ebx,
                          uint32_t *ecx, uint32_t *edx) {
     asm volatile("cpuid"
@@ -20,7 +24,7 @@ void cpudetect() {
           (uint32_t *)(vendor + 8), (uint32_t *)(vendor + 4));
     vendor[12] = '\0';
 
-    kprintf("CPU vendor: %s\n", vendor);
+    printf("CPU vendor: %s\n", vendor);
 
     if (largestStandardFunc >= 0x01) {
         cpuid(0x01, &eax, &ebx, &ecx, &edx);
@@ -31,6 +35,8 @@ void cpudetect() {
             kprint(" PSE");
         if (edx & EDX_PAE)
             kprint(" PAE");
+        if (edx & EDX_FPU)
+            kprint(" FPU");
         if (edx & EDX_APIC)
             kprint(" APIC");
         if (edx & EDX_MTRR)
@@ -103,6 +109,6 @@ void cpudetect() {
             ++p;
         }
 
-        kprintf("CPU name: %s\n", p);
+        printf("CPU name: %s\n", p);
     }
 }

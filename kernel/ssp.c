@@ -1,5 +1,5 @@
-#include "../libc/string.h"
 #include "panic.h"
+#include <string.h>
 
 #define STACK_CHK_GUARD 0xE2DEE396
 

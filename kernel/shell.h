@@ -1,7 +1,7 @@
 #ifndef SHELL_H
 #define SHELL_H
 
-void shell(char *input);
+void shell(const char *input);
 extern int halt();
 
 #endif

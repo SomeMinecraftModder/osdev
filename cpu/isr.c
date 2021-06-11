@@ -1,10 +1,14 @@
 #include "isr.h"
+#include "../debug/printf.h"
 #include "../drivers/keyboard.h"
 #include "../drivers/screen.h"
-#include "../libc/string.h"
 #include "idt.h"
 #include "ports.h"
 #include "timer.h"
+
+#ifdef __STRICT_ANSI__
+    #define asm __asm__
+#endif
 
 isr_t interrupt_handlers[256];
 
@@ -95,18 +99,18 @@ char *exception_messages[] = {"Division By Zero",
 
                               "Double Fault",
                               "Coprocessor Segment Overrun",
-                              "Bad TSS",
+                              "Invalid TSS",
                               "Segment Not Present",
                               "Stack Fault",
                               "General Protection Fault",
                               "Page Fault",
-                              "Unknown Interrupt",
+                              "Reserved",
 
                               "Coprocessor Fault",
                               "Alignment Check",
                               "Machine Check",
-                              "Reserved",
-                              "Reserved",
+                              "SIMD Exception",
+                              "Virtualization Exception",
                               "Reserved",
                               "Reserved",
                               "Reserved",
@@ -117,7 +121,7 @@ char *exception_messages[] = {"Division By Zero",
                               "Reserved",
                               "Reserved",
                               "Reserved",
-                              "Reserved",
+                              "Security Exception",
                               "Reserved"};
 
 void isr_handler(registers_t *r) {
@@ -125,13 +129,8 @@ void isr_handler(registers_t *r) {
         isr_t handler = interrupt_handlers[r->int_no];
         handler(r);
     } else {
-        kprint("received interrupt: ");
-        char s[3];
-        int_to_ascii(r->int_no, s);
-        kprint(s);
-        kprint("\n");
-        kprint(exception_messages[r->int_no]);
-        kprint("\n");
+        printf("received interrupt: %li\n%s\n", r->int_no,
+               exception_messages[r->int_no]);
     }
 }
 

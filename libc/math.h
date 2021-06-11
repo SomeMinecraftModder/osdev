@@ -7,6 +7,5 @@
 int max(int a, int b);
 int min(int a, int b);
 int sign(int x);
-int abs(int a);
 
 #endif

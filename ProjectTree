@@ -1,0 +1,88 @@
+.
+├── CHANGELOG.md
+├── CMakeLists.txt
+├── LICENSE
+├── ProjectTree
+├── README.md
+├── boot
+│   ├── boot.asm
+│   ├── gdt.asm
+│   └── header.asm
+├── cpu
+│   ├── detect.c
+│   ├── detect.h
+│   ├── idt.c
+│   ├── idt.h
+│   ├── interrupt.asm
+│   ├── isr.c
+│   ├── isr.h
+│   ├── paging.c
+│   ├── paging.h
+│   ├── ports.c
+│   ├── ports.h
+│   ├── timer.c
+│   ├── timer.h
+│   └── type.h
+├── debug
+│   ├── printf.c
+│   ├── printf.h
+│   ├── sha256.c
+│   ├── sha256.h
+│   ├── toml.c
+│   └── toml.h
+├── drivers
+│   ├── acpi.c
+│   ├── acpi.h
+│   ├── font.psf
+│   ├── keyboard.c
+│   ├── keyboard.h
+│   ├── psf.h
+│   ├── reboot.c
+│   ├── reboot.h
+│   ├── rtc.c
+│   ├── rtc.h
+│   ├── screen.c
+│   ├── screen.h
+│   ├── serial.c
+│   └── serial.h
+├── fs
+│   ├── saf.h
+│   ├── vfs.c
+│   ├── vfs.h
+│   └── vfs.o
+├── grub.cfg
+├── include
+│   ├── alloca.h
+│   ├── assert.h
+│   ├── ctype.h
+│   ├── errno.h
+│   ├── setjmp.h
+│   ├── signal.h
+│   ├── stdlib.h
+│   ├── string.h
+│   └── strings.h
+├── kernel
+│   ├── kernel.c
+│   ├── multiboot.h
+│   ├── panic.c
+│   ├── panic.h
+│   ├── shell.c
+│   ├── shell.h
+│   └── ssp.c
+├── libc
+│   ├── ctype.c
+│   ├── function.h
+│   ├── kheap.c
+│   ├── kheap.h
+│   ├── math.c
+│   ├── math.h
+│   ├── ordered_array.c
+│   ├── ordered_array.h
+│   ├── signal.c
+│   ├── stdlib.c
+│   ├── strerror.h
+│   ├── string.c
+│   └── strings.c
+└── linker.ld
+
+8 directories, 77 files
