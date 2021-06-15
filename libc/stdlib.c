@@ -848,6 +848,16 @@ void *realloc(void *ptr, size_t size) {
     return new_block;
 }
 
+void *reallocarray(void *optr, size_t nmemb, size_t size) {
+    size_t bytes;
+    if (__builtin_mul_overflow(nmemb, size, &bytes)) {
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    return realloc(optr, bytes);
+}
+
 void *aligned_alloc(size_t alignment, size_t size) {
     // This implementation does the work, I think
     return (void *)kmalloc_ap(alignment, malloc(size));

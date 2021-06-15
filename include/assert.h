@@ -1,5 +1,5 @@
-#ifndef ASSERT_H
-#define ASSERT_H
+#ifndef _ASSERT_H
+#define _ASSERT_H
 
 #include "../kernel/panic.h"
 

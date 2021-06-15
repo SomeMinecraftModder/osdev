@@ -4,6 +4,6 @@
 #include <stdint.h>
 
 _Noreturn void PANIC(char *file, uint32_t line, char *PANIC_MSG);
-extern _Noreturn int halt();
+extern _Noreturn void halt();
 
 #endif

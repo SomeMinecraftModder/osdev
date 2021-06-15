@@ -2,6 +2,6 @@
 #define SHELL_H
 
 void shell(const char *input);
-extern int halt();
+extern _Noreturn void halt();
 
 #endif

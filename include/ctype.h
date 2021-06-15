@@ -1,5 +1,5 @@
-#ifndef CTYPE_H
-#define CTYPE_H
+#ifndef _CTYPE_H
+#define _CTYPE_H
 
 int isxdigit(int c);
 int isblank(int c);

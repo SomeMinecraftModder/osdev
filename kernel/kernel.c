@@ -10,6 +10,7 @@
 #include "../drivers/acpi.h"
 #include "../drivers/screen.h"
 #include "../drivers/serial.h"
+#include "../drivers/ssfn.h"
 #include <signal.h>
 
 void kernel_main(uint32_t addr) {
@@ -32,9 +33,8 @@ void kernel_main(uint32_t addr) {
     kprint("Boot success.\n"
            "\n");
 
-    kprint("Copyright (C) 2020-2021 The PawsOS Team\n"
-           "This program comes with ABSOLUTELY NO WARRANTY.\n"
-           "This is free software, type 'ver' for details.\n");
+    kprint("PawsOS comes with ABSOLUTELY NO WARRANTY,\n"
+           "to the extent permitted by applicable law.\n");
 
     kprint("\nType 'help' to get started\n> ");
 }

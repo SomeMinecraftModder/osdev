@@ -16,24 +16,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standard headers.
 - (P)ATA hard disk driver.
 - VFS (Virtual File System) support.
-- Third-party Printf function.
 
 ### Changed
 - Corrected indent.
 - Use Switch for keyboard (instead of "if else-if").
 - ISR exception messages.
 - ACPI FADT table.
+- [printf](https://github.com/mpaland/printf) replaces old printf.
+- [SSFN](https://gitlab.com/bztsrc/scalable-font2) replaces old text render.
 
 ### Removed
 - Make build system.
-- Own printf function.
 
 ## [0.03] - 2021-04-25
 ### Added
 - GCC compatibility list.
 - Standard memory and string functions.
 - ctype.h standard library.
-- Printf-like PANIC message.
+- printf-like PANIC message.
 - PS/2 ports setup.
 - Random numbers generator.
 - FPU initialization code.

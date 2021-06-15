@@ -1,5 +1,5 @@
-#ifndef SIGNAL_H
-#define SIGNAL_H
+#ifndef _SIGNAL_H
+#define _SIGNAL_H
 
 #define SIG_ERR ((void (*)(int)) - 1)
 #define SIG_DFL ((void (*)(int))0)

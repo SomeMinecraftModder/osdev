@@ -1,34 +1,37 @@
 #include "screen.h"
+#define SSFN_CONSOLEBITMAP_TRUECOLOR
+#include "ssfn.h"
 #include <string.h>
 
 multiboot_info_t *mbi;
 
-Color white = {255, 255, 255};
-Color green = {0, 255, 0};
-Color blue = {0, 0, 255};
-Color red = {168, 0, 0};
-Color black = {1, 1, 1};
+Color white = rgb(255, 255, 255);
+Color green = rgb(0, 255, 0);
+Color blue = rgb(0, 0, 255);
+Color red = rgb(168, 0, 0);
+Color black = rgb(1, 1, 1);
 
-// Default color, can be changed by "clear_screen", used as text background and
-// color for screen scroll
-Color bgcolor = {1, 1, 1};
+// Default color, can be changed by "clear_screen", used as text background
+Color bgcolor = rgb(1, 1, 1);
 
 int cursor_x = 0, cursor_y = 0;
 uint32_t *fb;
-PSF *fb_font;
 
-// Font is Terminus.
-extern char _binary_font_psf_start;
+extern unsigned char _binary_font_sfn_start;
 
 void init_video(uint32_t addr) {
     mbi = (multiboot_info_t *)addr;
     fb = (uint32_t *)(uintptr_t)mbi->framebuffer_addr;
-    fb_font = (PSF *)&_binary_font_psf_start;
-    clear_screen(bgcolor);
-}
 
-Color rgb(int r, int g, int b) {
-    return (Color){r, g, b};
+    ssfn_src = (ssfn_font_t *)&_binary_font_sfn_start;
+
+    ssfn_dst.ptr = (uint8_t *)(uintptr_t)mbi->framebuffer_addr;
+    ssfn_dst.w = mbi->framebuffer_width;
+    ssfn_dst.h = mbi->framebuffer_height;
+    ssfn_dst.p = mbi->framebuffer_pitch;
+    ssfn_dst.x = ssfn_dst.y = 0;
+
+    clear_screen(bgcolor);
 }
 
 uint32_t get_color(Color *color) {
@@ -42,7 +45,7 @@ void draw_pixel(int x, int y, uint32_t color) {
     fb[fb_i] = color;
 }
 
-void putchar_at(char c, int position_x, int position_y, Color color) {
+void putchar_at(int c, int position_x, int position_y, Color color) {
     switch (c) {
         case '\n':
             cursor_y++;
@@ -67,33 +70,26 @@ void putchar_at(char c, int position_x, int position_y, Color color) {
             return;
     }
 
-    uint8_t *glyph = &fb_font->data[c * fb_font->glyph_size];
-
-    if ((cursor_y * fb_font->height) >= mbi->framebuffer_height) {
+    if ((cursor_y * ssfn_src->height) >= (signed)mbi->framebuffer_height) {
         kprint_newline();
         putchar_at(c, cursor_x, cursor_y, color);
         cursor_x--;
     }
 
-    size_t x = position_x * fb_font->width, y = position_y * fb_font->height;
-
-    static const uint8_t masks[8] = {128, 64, 32, 16, 8, 4, 2, 1};
-
-    size_t i, j;
-    for (i = 0; i < fb_font->height; i++) {
-        for (j = 0; j < fb_font->width; j++) {
-            if (glyph[i] & masks[j]) {
-                draw_pixel(x + j, y + i, get_color(&color));
-            } else {
-                draw_pixel(x + j, y + i, get_color(&bgcolor));
-            }
-        }
+    if (ssfn_dst.fg != get_color(&color)) {
+        ssfn_dst.fg = get_color(&color);
     }
 
-    if (((cursor_x * fb_font->width) + (fb_font->width)) >=
-        mbi->framebuffer_width - (fb_font->width * 2)) {
+    ssfn_dst.x = position_x * ssfn_src->width;
+    ssfn_dst.y = position_y * ssfn_src->height;
+
+    ssfn_putc(c);
+
+    if (((cursor_x * ssfn_src->width) + (ssfn_src->width)) >=
+        (signed)(mbi->framebuffer_width - (ssfn_src->width * 2))) {
         cursor_y++;
-        cursor_x = 0;
+        cursor_x = 1;
+        return;
     }
 
     if (c != '\n') {
@@ -101,20 +97,45 @@ void putchar_at(char c, int position_x, int position_y, Color color) {
     }
 }
 
+void putchar_color(int c, Color color) {
+    putchar_at(c, cursor_x, cursor_y, color);
+}
+
+void putchar(int c) {
+    putchar_color(c, white);
+}
+
+void kprint_at(char *string, int position_x, int position_y, Color color) {
+    while (*string) {
+        putchar_at(ssfn_utf8(&string), position_x, position_y, color);
+        position_x++;
+        cursor_x--;
+    }
+}
+
+void kprint_color(char *string, Color color) {
+    while (*string) {
+        putchar_color(ssfn_utf8(&string), color);
+    }
+}
+
+void kprint(char *string) {
+    kprint_color(string, white);
+}
+
 void kprint_backspace() {
     if (cursor_x <= 1) {
         cursor_y--;
-        /* 132 - 1 (See down) = 131
-         * NOTE: This may broke when using other fonts */
+        // NOTE: This may broke when using other fonts
         cursor_x = 132;
     }
 
-    size_t x = (cursor_x * fb_font->width) - fb_font->width,
-           y = cursor_y * fb_font->height;
+    size_t x = (cursor_x * ssfn_src->width) - ssfn_src->width,
+           y = cursor_y * ssfn_src->height;
 
     size_t i, j;
-    for (i = 0; i < fb_font->height; i++) {
-        for (j = 0; j < fb_font->width; j++) {
+    for (i = 0; i < ssfn_src->height; i++) {
+        for (j = 0; j < ssfn_src->width; j++) {
             draw_pixel(x + j, y + i, get_color(&bgcolor));
         }
     }
@@ -123,57 +144,32 @@ void kprint_backspace() {
 }
 
 void kprint_newline() {
-    for (uint32_t y = fb_font->height; y != mbi->framebuffer_height; ++y) {
+    for (uint32_t y = ssfn_src->height; y != mbi->framebuffer_height; ++y) {
         void *dest = (void *)(((uintptr_t)fb) +
-                              (y - fb_font->height) * mbi->framebuffer_pitch);
+                              (y - ssfn_src->height) * mbi->framebuffer_pitch);
         const void *src =
           (void *)(((uintptr_t)fb) + y * mbi->framebuffer_pitch);
         memcpy(dest, src, mbi->framebuffer_width * 4);
     }
 
     cursor_y--;
-
     cursor_x = 132;
-    size_t x = (cursor_x * fb_font->width) - fb_font->width,
-           y = cursor_y * fb_font->height;
+
+    size_t x = (cursor_x * ssfn_src->width) - ssfn_src->width,
+           y = cursor_y * ssfn_src->height;
 
     size_t i, j;
-    while (x >= (2 * fb_font->width)) {
-        for (i = 0; i < fb_font->height; i++) {
-            for (j = 0; j < fb_font->width; j++) {
+    while (x >= (2 * ssfn_src->width)) {
+        for (i = 0; i < ssfn_src->height; i++) {
+            for (j = 0; j < ssfn_src->width; j++) {
                 draw_pixel(x + j, y + i, get_color(&bgcolor));
             }
         }
-        x = (cursor_x * fb_font->width) - fb_font->width,
-        y = cursor_y * fb_font->height;
+
+        x = (cursor_x * ssfn_src->width) - ssfn_src->width,
+        y = cursor_y * ssfn_src->height;
         cursor_x--;
     }
-}
-
-void putchar_color(char c, Color color) {
-    putchar_at(c, cursor_x, cursor_y, color);
-}
-
-void putchar(char c) {
-    putchar_color(c, white);
-}
-
-void kprint_at(char *string, int position_x, int position_y, Color color) {
-    while (*string) {
-        putchar_at(*string++, position_x, position_y, color);
-        position_x++;
-        cursor_x--;
-    }
-}
-
-void kprint_color(char *string, Color color) {
-    while (*string) {
-        putchar_color(*string++, color);
-    }
-}
-
-void kprint(char *string) {
-    kprint_color(string, white);
 }
 
 void clear_screen(Color color) {
@@ -190,6 +186,8 @@ void clear_screen(Color color) {
     }
 
     bgcolor = color;
+
+    ssfn_dst.bg = get_color(&bgcolor);
 }
 
 void kprint_gok() {

@@ -1,5 +1,5 @@
-#ifndef STDLIB_H
-#define STDLIB_H
+#ifndef _STDLIB_H
+#define _STDLIB_H
 
 #include <stddef.h>
 
@@ -49,6 +49,7 @@ size_t mbstowcs(wchar_t *restrict ws, const char *restrict s, size_t wn);
 size_t wcstombs(char *restrict s, const wchar_t *restrict ws, size_t n);
 long long strtoll(const char *nptr, char **endptr, register int base);
 int mbtowc(wchar_t *restrict wc, const char *restrict src, size_t n);
+void *reallocarray(void *optr, size_t nmemb, size_t size);
 long strtol(const char *nptr, char **endptr, int base);
 void *aligned_alloc(size_t alignment, size_t size);
 long double strtold(char *str, char **endptr);

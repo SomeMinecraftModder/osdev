@@ -1,8 +1,7 @@
 #ifndef REBOOT_H
 #define REBOOT_H
 
-void shutdown_vm();
-extern int halt();
+extern _Noreturn void halt();
 void reboot();
 
 #endif

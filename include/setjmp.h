@@ -1,5 +1,5 @@
-#ifndef SETJMP_H
-#define SETJMP_H
+#ifndef _SETJMP_H
+#define _SETJMP_H
 
 typedef intptr_t jmp_buf[5];
 
