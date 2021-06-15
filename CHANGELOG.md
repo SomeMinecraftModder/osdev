@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ISR exception messages.
 - ACPI FADT table.
 - [printf](https://github.com/mpaland/printf) replaces old printf.
-- [SSFN](https://gitlab.com/bztsrc/scalable-font2) replaces old text render.
+- [SSFN](https://gitlab.com/bztsrc/scalable-font2) replaces old text renderer.
 
 ### Removed
 - Make build system.

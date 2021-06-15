@@ -10,7 +10,6 @@
 #include "../drivers/acpi.h"
 #include "../drivers/screen.h"
 #include "../drivers/serial.h"
-#include "../drivers/ssfn.h"
 #include <signal.h>
 
 void kernel_main(uint32_t addr) {
