@@ -1224,7 +1224,7 @@ size_t wcstombs(char *restrict s, const wchar_t *restrict ws, size_t n) {
 
 int globstatus;
 
-_Noreturn void _Exit(int status) {
+void _Exit(int status) {
     putchar('\n');
     globstatus = status;
     extern int dis_print;
@@ -1234,7 +1234,7 @@ _Noreturn void _Exit(int status) {
         ;
 }
 
-_Noreturn void exit(int status) {
+void exit(int status) {
     while (regedhands != 0) {
         --regedhands;
         void (*function)(void) = atexitfunc[regedhands];
@@ -1247,7 +1247,7 @@ _Noreturn void exit(int status) {
     }
 }
 
-_Noreturn void abort() {
+void abort() {
     kprint("Aborted");
 
     for (;;) {
@@ -1261,7 +1261,7 @@ int atexit(void (*function)(void)) {
     return 0;
 }
 
-_Noreturn void quick_exit(int status) {
+void quick_exit(int status) {
     while (regedqhands != 0) {
         --regedqhands;
         void (*function)(void) = atqexitfunc[regedqhands];
