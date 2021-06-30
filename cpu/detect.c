@@ -1,33 +1,23 @@
 #include "detect.h"
 #include "../debug/printf.h"
 #include "../drivers/screen.h"
+#include <cpuid.h>
 #include <stdint.h>
-
-#ifdef __STRICT_ANSI__
-    #define asm __asm__
-#endif
-
-static inline void cpuid(uint32_t reg, uint32_t *eax, uint32_t *ebx,
-                         uint32_t *ecx, uint32_t *edx) {
-    asm volatile("cpuid"
-                 : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx)
-                 : "0"(reg));
-}
 
 void cpudetect() {
     // Register storage
-    uint32_t eax, ebx, ecx, edx;
+    unsigned int eax, ebx, ecx, edx;
 
-    uint32_t largestStandardFunc;
+    unsigned int largestStandardFunc;
     char vendor[13];
-    cpuid(0, &largestStandardFunc, (uint32_t *)(vendor + 0),
-          (uint32_t *)(vendor + 8), (uint32_t *)(vendor + 4));
+    __get_cpuid(0, &largestStandardFunc, (unsigned int *)(vendor + 0),
+                (unsigned int *)(vendor + 8), (unsigned int *)(vendor + 4));
     vendor[12] = '\0';
 
     printf("CPU vendor: %s\n", vendor);
 
     if (largestStandardFunc >= 0x01) {
-        cpuid(0x01, &eax, &ebx, &ecx, &edx);
+        __get_cpuid(0x01, &eax, &ebx, &ecx, &edx);
 
         kprint("Features:");
 
@@ -72,11 +62,11 @@ void cpudetect() {
             kprint(" SSE4.2");
     }
 
-    uint32_t largestExtendedFunc;
-    cpuid(0x80000000, &largestExtendedFunc, &ebx, &ecx, &edx);
+    unsigned int largestExtendedFunc;
+    __get_cpuid(0x80000000, &largestExtendedFunc, &ebx, &ecx, &edx);
 
     if (largestExtendedFunc >= 0x80000001) {
-        cpuid(0x80000001, &eax, &ebx, &ecx, &edx);
+        __get_cpuid(0x80000001, &eax, &ebx, &ecx, &edx);
 
         if (ecx & ECX_SSE4A)
             kprint(" SSE4A");
@@ -96,12 +86,15 @@ void cpudetect() {
 
     if (largestExtendedFunc >= 0x80000004) {
         char name[48];
-        cpuid(0x80000002, (uint32_t *)(name + 0), (uint32_t *)(name + 4),
-              (uint32_t *)(name + 8), (uint32_t *)(name + 12));
-        cpuid(0x80000003, (uint32_t *)(name + 16), (uint32_t *)(name + 20),
-              (uint32_t *)(name + 24), (uint32_t *)(name + 28));
-        cpuid(0x80000004, (uint32_t *)(name + 32), (uint32_t *)(name + 36),
-              (uint32_t *)(name + 40), (uint32_t *)(name + 44));
+        __get_cpuid(0x80000002, (unsigned int *)(name + 0),
+                    (unsigned int *)(name + 4), (unsigned int *)(name + 8),
+                    (unsigned int *)(name + 12));
+        __get_cpuid(0x80000003, (unsigned int *)(name + 16),
+                    (unsigned int *)(name + 20), (unsigned int *)(name + 24),
+                    (unsigned int *)(name + 28));
+        __get_cpuid(0x80000004, (unsigned int *)(name + 32),
+                    (unsigned int *)(name + 36), (unsigned int *)(name + 40),
+                    (unsigned int *)(name + 44));
 
         // Processor name is right justified with leading spaces
         char *p = name;

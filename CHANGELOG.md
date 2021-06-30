@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ACPI FADT table.
 - [printf](https://github.com/mpaland/printf) replaces old printf.
 - [SSFN](https://gitlab.com/bztsrc/scalable-font2) replaces old text renderer.
+- Use \<cpuid.h\> instead of inline assembly.
 
 ### Removed
 - Make build system.

@@ -59,7 +59,7 @@ Then build following this steps:
 1. Create a directory called `build` in the source directory.
 2. Change to that directory.
 3. Run `cmake -DCMAKE_BUILD_TYPE=Release ..`.
-4. Run `make` and wait until build finishes.
+4. Run `cmake --build .` and wait until build finishes.
 
 You will get two files after a successful build:
 -   os-image.elf
