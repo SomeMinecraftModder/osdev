@@ -25,7 +25,7 @@
     #undef MB_CUR_MAX
 #endif
 
-#define MB_CUR_MAX 1
+#define MB_CUR_MAX 4
 
 typedef struct {
     int quot, rem;

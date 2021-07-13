@@ -314,8 +314,6 @@ void *memcpy(void *restrict dest, const void *restrict src, size_t n) {
     return dest;
 }
 
-#define ALIGNM (sizeof(size_t) - 1)
-
 void *memccpy(void *restrict dest, const void *restrict src, int c, size_t n) {
     uint8_t *d = dest;
     const uint8_t *s = src;
@@ -325,10 +323,11 @@ void *memccpy(void *restrict dest, const void *restrict src, int c, size_t n) {
     typedef size_t __attribute__((__may_alias__)) word;
     word *wd;
     const word *ws;
-    if (((uintptr_t)s & ALIGNM) == ((uintptr_t)d & ALIGNM)) {
-        for (; ((uintptr_t)s & ALIGNM) && n && (*d = *s) != c; n--, s++, d++)
+    if (((uintptr_t)s & (ALIGN - 1)) == ((uintptr_t)d & (ALIGN - 1))) {
+        for (; ((uintptr_t)s & (ALIGN - 1)) && n && (*d = *s) != c;
+             n--, s++, d++)
             ;
-        if ((uintptr_t)s & ALIGNM) {
+        if ((uintptr_t)s & (ALIGN - 1)) {
             goto tail;
         }
 
@@ -500,19 +499,18 @@ void *memmove(void *dest, const void *src, size_t n) {
     return dest;
 }
 
-#define SS (sizeof(size_t))
-
 void *memchr(const void *src, int c, size_t n) {
     const uint8_t *s = src;
     c = (uint8_t)c;
 #ifdef __GNUC__
-    for (; ((uintptr_t)s & ALIGNM) && n && *s != c; s++, n--)
+    for (; ((uintptr_t)s & (ALIGN - 1)) && n && *s != c; s++, n--)
         ;
     if (n && *s != c) {
         typedef size_t __attribute__((__may_alias__)) word;
         const word *w;
         size_t k = ONES * c;
-        for (w = (const void *)s; n >= SS && !HASZERO(*w ^ k); w++, n -= SS)
+        for (w = (const void *)s; n >= ALIGN && !HASZERO(*w ^ k);
+             w++, n -= ALIGN)
             ;
         s = (const void *)w;
     }
@@ -694,8 +692,8 @@ char *stpncpy(char *restrict d, const char *restrict s, size_t n) {
     typedef size_t __attribute__((__may_alias__)) word;
     word *wd;
     const word *ws;
-    if (((uintptr_t)s & ALIGNM) == ((uintptr_t)d & ALIGNM)) {
-        for (; ((uintptr_t)s & ALIGNM) && n && (*d = *s); n--, s++, d++)
+    if (((uintptr_t)s & (ALIGN - 1)) == ((uintptr_t)d & (ALIGN - 1))) {
+        for (; ((uintptr_t)s & (ALIGN - 1)) && n && (*d = *s); n--, s++, d++)
             ;
         if (!n || !*s) {
             goto tail;

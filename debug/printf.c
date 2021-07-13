@@ -491,8 +491,9 @@ static size_t etoa(out_fct_type out, char *buffer, size_t idx, size_t maxlen,
         out((flags & FLAGS_UPPERCASE) ? 'E' : 'e', buffer, idx++, maxlen);
         // Output the exponent value
         idx = ntoa_long(out, buffer, idx, maxlen,
-                        (expval < 0) ? -expval : expval, expval < 0, 10, 0,
-                        minwidth - 1, FLAGS_ZEROPAD | FLAGS_PLUS);
+                        (unsigned long)((expval < 0) ? -expval : expval),
+                        expval < 0, 10, 0, minwidth - 1,
+                        FLAGS_ZEROPAD | FLAGS_PLUS);
         // Might need to right-pad spaces
         if (flags & FLAGS_LEFT) {
             while (idx - start_idx < width)
