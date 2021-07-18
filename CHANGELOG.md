@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Make build system.
+- FPU initialization code (VirtualBox doesn't like it).
 
 ## [0.03] - 2021-04-25
 ### Added

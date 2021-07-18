@@ -22,13 +22,6 @@ _start:
 
     call test_multiboot
     call test_cpuid
-    call test_fpu
-
-    mov eax, cr0 ; Enable FPU
-    and al, ~4
-    or al, 66
-    mov cr0, eax
-    fninit
 
     lgdt [gdt_descriptor] ; Load the GDT descriptor
     jmp CODE_SEG:.setcs   ; Set CS to our 32-bit flat code selector
@@ -65,20 +58,6 @@ test_cpuid:
     xor eax, ecx     ; Do a XOR-operation on the A-register and the C-register.
     jz halt          ; The zero flag is set, no CPUID.
     ret              ; CPUID is available for use.
-
-test_fpu:
-    mov eax, 0x1
-    cpuid
-    test edx, 1 << 0
-    jz .no_fpu
-    ret
-
-.no_fpu:
-    mov eax, cr0
-    or al, 4
-    and al, ~2
-    mov cr0, eax
-    jmp halt
 
 halt:
     cli
