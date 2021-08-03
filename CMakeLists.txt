@@ -1,11 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(PawsOS VERSION 0.0.3 LANGUAGES C ASM)
+project(PawsOS VERSION 0.0.3 LANGUAGES C ASM_NASM)
 
-file(GLOB SOURCES cpu/*.c debug/*.c drivers/*.c fs/*.c libc/*.c
-     kernel/*.c boot/*.asm cpu/*.asm)
-
-enable_language(ASM_NASM)
+file(GLOB_RECURSE SOURCES *.c *.asm)
 
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
