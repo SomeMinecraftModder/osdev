@@ -5,7 +5,7 @@ A simple OS, which has various features:
 -   GDT
 -   Ports
 -   Serial ports (COM1, COM2, COM3, COM4)
--   Keyboard
+-   Keyboard (Qwerty and azerty)
 -   Multiboot (Can be booted by GNU Grub)
 -   RTC (Real Time Clock)
 -   ACPI (Can shut down your computer)
